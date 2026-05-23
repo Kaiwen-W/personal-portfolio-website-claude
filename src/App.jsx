@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowUpRight,
+  ArrowLeft,
   ChevronDown,
+  FileText,
   Sparkles,
   Wrench,
   AppWindow,
@@ -10,16 +12,19 @@ import {
   BookOpen,
   GraduationCap,
   Briefcase,
+  Pencil,
+  Code,
+  Camera,
 } from "lucide-react";
 
-/* ------------------------------------------------------------------ *
+/* ==================================================================
  *  EDIT EVERYTHING ABOUT YOU IN THIS BLOCK
- *  Each timeline entry has a `details` object — that is what shows
- *  inside the dropdown when the entry is clicked.
- * ------------------------------------------------------------------ */
+ * ==================================================================
+ *  Posts are NOT edited here — see the `src/posts/` folder.
+ *  Drop a new `.md` file in there and it appears automatically.
+ * ================================================================== */
 const profile = {
   name: "Alex Rivera",
-  status: "Open to new-grad roles",
   subtitle: "Software engineer based in Edinburgh, UK",
   bio: "I build small tools that make everyday things feel a little more delightful — usually somewhere between hardware, interfaces and the people who use them.",
   socials: [
@@ -153,39 +158,8 @@ const leadership = [
   },
 ];
 
-const projects = [
-  {
-    title: "Pulse",
-    tag: "engagement platform",
-    desc: "A platform to increase lecture engagement through real-time audience reactions and data visualization. Trialled in live lectures alongside university staff.",
-    grad: ["#FF3F5C", "#5B3BF0"],
-  },
-  {
-    title: "Build Circle",
-    tag: "student community",
-    desc: "Founded a student society gathering the most proactive builders on campus to hold regular meetups and share updates on personal projects.",
-    grad: ["#3142F0", "#FF3F5C"],
-  },
-  {
-    title: "Gesture Fan",
-    tag: "hardware + vision",
-    desc: "A smart fan prototype with computer vision. It tracks people and responds to hand gestures, paired with a companion app for remote control and monitoring.",
-    grad: ["#5B3BF0", "#FFA0B4"],
-  },
-];
+/* Projects are sourced from src/projects/*.md — see the PROJECTS block below. */
 
-const posts = [
-  { icon: Sparkles, title: "Building Gesture Fan", desc: "Project writeup of a fan controlled with computer vision", read: "3 min read" },
-  { icon: Wrench, title: "What I use", desc: "A list of tools and gear I use and recommend", read: "2 min read" },
-  { icon: AppWindow, title: "About this website", desc: "A behind-the-scenes look at how this site was built", read: "3 min read" },
-  { icon: Activity, title: "Pulse: lessons learned", desc: "A writeup of a tool I built to help lecturers", read: "5 min read" },
-  { icon: ListChecks, title: "Bucket List", desc: "A list of things I want to do before I —", read: "1 min read" },
-  { icon: BookOpen, title: "Books", desc: "A list of books I've read and recommend", read: "1 min read" },
-  { icon: GraduationCap, title: "My dissertation, as a paper", desc: "The story behind my dissertation and how it became a paper", read: "8 min read" },
-  { icon: Briefcase, title: "Internships 102", desc: "Things I wish I knew before I started applying", read: "5 min read" },
-];
-
-/* the three timeline blocks, in order, each with its own accent */
 const timelineSections = [
   { num: "01", label: "Experience", accent: "#FF3F5C", items: experience },
   { num: "02", label: "Education", accent: "#3142F0", items: education },
@@ -194,9 +168,319 @@ const timelineSections = [
 
 const ICON_TINTS = ["#FF3F5C", "#3142F0", "#5B3BF0", "#FFA0B4"];
 
+/* ==================================================================
+ *  POSTS — sourced automatically from `src/posts/*.md`
+ * ==================================================================
+ *  How to add a post: create a file like `src/posts/my-post.md` with
+ *  a frontmatter header, then write the body in Markdown:
+ *
+ *      ---
+ *      title: My Post Title
+ *      description: One-line blurb shown in the list
+ *      date: 2026-06-01
+ *      icon: pencil          (optional — see ICONS below)
+ *      read: 4 min read      (optional — auto-estimated if omitted)
+ *      ---
+ *
+ *      # Heading
+ *      Body text in **Markdown**...
+ *
+ *  The link on the home page is generated for you. No code changes.
+ * ================================================================== */
+
+const ICONS = {
+  filetext: FileText, sparkles: Sparkles, wrench: Wrench, appwindow: AppWindow,
+  activity: Activity, listchecks: ListChecks, bookopen: BookOpen,
+  graduationcap: GraduationCap, briefcase: Briefcase, pencil: Pencil,
+  code: Code, camera: Camera,
+};
+function iconFor(name) {
+  return ICONS[String(name || "").toLowerCase()] || FileText;
+}
+
+/* split a raw .md string into frontmatter data + body */
+function parseFrontmatter(raw) {
+  const data = {};
+  let body = raw;
+  const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  if (m) {
+    body = m[2];
+    m[1].split(/\r?\n/).forEach((line) => {
+      const idx = line.indexOf(":");
+      if (idx === -1) return;
+      const key = line.slice(0, idx).trim();
+      let val = line.slice(idx + 1).trim().replace(/^["']|["']$/g, "");
+      if (key) data[key] = val;
+    });
+  }
+  return { data, body: body.trim() };
+}
+
+function estimateRead(body) {
+  const words = body.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200)) + " min read";
+}
+
+function slugFromPath(path) {
+  return path.split("/").pop().replace(/\.md$/, "");
+}
+
+/* Vite picks up every .md file in src/posts at build time.
+   Wrapped in try/catch so the file still runs in non-Vite previews. */
+let rawPosts = {};
+try {
+  rawPosts = import.meta.glob("./posts/*.md", {
+    eager: true,
+    query: "?raw",
+    import: "default",
+  });
+} catch (e) {
+  rawPosts = {};
+}
+
+const globbedPosts = Object.entries(rawPosts).map(([path, raw]) => {
+  const { data, body } = parseFrontmatter(raw);
+  return {
+    slug: data.slug || slugFromPath(path),
+    title: data.title || slugFromPath(path),
+    description: data.description || "",
+    date: data.date || "",
+    icon: data.icon || "filetext",
+    read: data.read || estimateRead(body),
+    body,
+  };
+});
+
+/* Fallback content — only used in previews that can't read the
+   posts folder (e.g. the in-chat artifact). On the real site the
+   files in src/posts/ are always used instead. */
+const SAMPLE_POSTS = [
+  {
+    slug: "building-gesture-fan", title: "Building Gesture Fan", icon: "sparkles",
+    description: "Project writeup of a fan controlled with computer vision",
+    date: "2026-05-18", read: "2 min read",
+    body: "Gesture Fan began with a simple annoyance: a fan that blows air at an empty corner of the room while you sit just out of its reach.\n\n## The idea\n\nWhat if the fan could see? Just enough to know roughly where a person is and point itself at them — and skip the remote entirely.\n\n## How it works\n\nThe prototype runs a lightweight pose model on a small camera. From that:\n\n- It tracks the nearest person and rotates to follow them\n- It recognises a few hand gestures for speed control\n- It pairs with a companion app over the local network\n\n## What I learned\n\nHardware is humbling. But there is nothing like the moment a thing you built physically turns to look at you.",
+  },
+  {
+    slug: "what-i-use", title: "What I use", icon: "wrench",
+    description: "A list of tools and gear I use and recommend",
+    date: "2026-05-10", read: "1 min read",
+    body: "People ask what I use often enough that a list felt easier than repeating myself.\n\n## Languages\n\nDay to day it is mostly **TypeScript** and **Python** — Python when a problem is mostly thinking, TypeScript when it is mostly interface.\n\n## Hardware\n\n- A laptop more portable than powerful\n- A mechanical keyboard with quiet switches\n- An e-reader, because screens are tiring\n\n## Principles over tools\n\nKeep the toolchain small, learn it deeply, and do not chase every new thing.",
+  },
+  {
+    slug: "about-this-website", title: "About this website", icon: "appwindow",
+    description: "A behind-the-scenes look at how this site was built",
+    date: "2026-05-02", read: "1 min read",
+    body: "This site is intentionally small. One page, a few sections, a dark background.\n\n## How it is built\n\nA React app styled with Tailwind, built with Vite and hosted on GitHub Pages. Posts — including this one — are just **Markdown files** in a folder. Drop a new file in, and a link appears here automatically.\n\n## The animations\n\nThere is motion, but it stays quiet: sections fade in, cards lift when you point at them, and a soft light follows the cursor.",
+  },
+];
+
+const posts = (globbedPosts.length ? globbedPosts : SAMPLE_POSTS)
+  .slice()
+  .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+/* ==================================================================
+ *  PROJECTS — sourced automatically from `src/projects/*.md`
+ * ==================================================================
+ *  Works exactly like posts: add a `.md` file with frontmatter and it
+ *  appears on the home page with its own project page. Frontmatter:
+ *
+ *      ---
+ *      title: My Project
+ *      tag: short label shown under the title
+ *      description: One-line blurb shown on the home page
+ *      date: 2026-06-01
+ *      colors: #FF3F5C, #5B3BF0    (the two gradient colours)
+ *      ---
+ *
+ *      # Writeup
+ *      Body text in **Markdown**...
+ * ================================================================== */
+
+function parseColors(str) {
+  const parts = String(str || "").split(",").map((s) => s.trim()).filter(Boolean);
+  if (parts.length >= 2) return [parts[0], parts[1]];
+  if (parts.length === 1) return [parts[0], parts[0]];
+  return ["#FF3F5C", "#5B3BF0"];
+}
+
+let rawProjects = {};
+try {
+  rawProjects = import.meta.glob("./projects/*.md", {
+    eager: true,
+    query: "?raw",
+    import: "default",
+  });
+} catch (e) {
+  rawProjects = {};
+}
+
+const globbedProjects = Object.entries(rawProjects).map(([path, raw]) => {
+  const { data, body } = parseFrontmatter(raw);
+  return {
+    slug: data.slug || slugFromPath(path),
+    title: data.title || slugFromPath(path),
+    tag: data.tag || "",
+    description: data.description || "",
+    colors: parseColors(data.colors),
+    date: data.date || "",
+    body,
+  };
+});
+
+const SAMPLE_PROJECTS = [
+  {
+    slug: "pulse", title: "Pulse", tag: "engagement platform",
+    description: "A platform to increase lecture engagement through real-time audience reactions and data visualization. Trialled in live lectures alongside university staff.",
+    colors: ["#FF3F5C", "#5B3BF0"], date: "2026-04-20",
+    body: "Pulse started from a quiet observation in a packed lecture hall: a room of three hundred people, and almost no way for the person at the front to tell whether any of it was landing.\n\n## The problem\n\nLectures are broadcast-only by default. A lecturer can ask for questions and read a wall of silence — but silence is not data.\n\n## What it does\n\nPulse gives the room a lightweight back-channel. Students tap reactions on their phones and the lecturer sees the mood of the room update live.\n\n- Anonymous reactions, so quieter students still speak up\n- A live timeline a lecturer can review after class\n- Simple enough to learn in thirty seconds\n\n## Outcome\n\nWe trialled Pulse across several real lectures. The most common feedback was that, for the first time, the lecturer felt like they could see the room.",
+  },
+  {
+    slug: "build-circle", title: "Build Circle", tag: "student community",
+    description: "Founded a student society gathering the most proactive builders on campus to hold regular meetups and share updates on personal projects.",
+    colors: ["#3142F0", "#FF3F5C"], date: "2026-03-15",
+    body: "Build Circle is less a piece of software and more a piece of community design — though it has a small site holding it together.\n\n## Why start it\n\nUniversity is full of people quietly building things and almost no structured way for them to find each other.\n\n## How it works\n\n- Fortnightly demo nights where everyone shows progress\n- An end-of-year showcase open to the whole department\n- A members directory and a feed of current work\n\n## What I learned\n\nThe hardest part of a community is not starting it — it is the unglamorous work of keeping a rhythm.",
+  },
+  {
+    slug: "gesture-fan", title: "Gesture Fan", tag: "hardware + vision",
+    description: "A smart fan prototype with computer vision. It tracks people and responds to hand gestures, paired with a companion app for remote control and monitoring.",
+    colors: ["#5B3BF0", "#FFA0B4"], date: "2026-02-28",
+    body: "Gesture Fan is a fan that pays attention. It is the project that taught me the most about working at the seam between hardware and software.\n\n## The concept\n\nA normal fan keeps pointing wherever it pointed last. Gesture Fan watches the room with a small camera and aims itself at people instead.\n\n## Building it\n\n- It finds the nearest person and rotates to follow them\n- It reads a few hand gestures so you can change speed without a remote\n- A companion app exposes finer control over the local network\n\n## The honest part\n\nIt took far longer than expected — physical things fail in physical ways. But a fan that turns to look at you is a small piece of magic.",
+  },
+];
+
+const projects = (globbedProjects.length ? globbedProjects : SAMPLE_PROJECTS)
+  .slice()
+  .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+function formatDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString("en-GB", {
+    year: "numeric", month: "long", day: "numeric",
+  });
+}
+
+/* ---------- tiny Markdown renderer (no dependencies) ---------- */
+function renderInline(text, kp) {
+  const out = [];
+  let rest = text;
+  let k = 0;
+  const re = /(`[^`]+`)|(\*\*[^*]+\*\*)|(\*[^*]+\*)|(_[^_]+_)|(\[[^\]]+\]\([^)]+\))/;
+  while (rest.length) {
+    const m = rest.match(re);
+    if (!m) { out.push(rest); break; }
+    if (m.index > 0) out.push(rest.slice(0, m.index));
+    const t = m[0];
+    if (t.startsWith("`")) {
+      out.push(<code key={kp + k} className="arc-md-code">{t.slice(1, -1)}</code>);
+    } else if (t.startsWith("**")) {
+      out.push(<strong key={kp + k}>{t.slice(2, -2)}</strong>);
+    } else if (t.startsWith("*") || t.startsWith("_")) {
+      out.push(<em key={kp + k}>{t.slice(1, -1)}</em>);
+    } else {
+      const lm = t.match(/\[([^\]]+)\]\(([^)]+)\)/);
+      out.push(
+        <a key={kp + k} href={lm[2]} className="arc-md-link" target="_blank" rel="noreferrer">
+          {lm[1]}
+        </a>
+      );
+    }
+    rest = rest.slice(m.index + t.length);
+    k++;
+  }
+  return out;
+}
+
+function renderMarkdown(md) {
+  const lines = String(md).replace(/\r\n/g, "\n").split("\n");
+  const tags = ["h2", "h3", "h4", "h5"];
+  const hClass = ["arc-md-h1", "arc-md-h2", "arc-md-h3", "arc-md-h4"];
+  const blocks = [];
+  let i = 0, key = 0;
+  const isSpecial = (l) =>
+    /^(#{1,4})\s/.test(l) || l.trim().startsWith("```") ||
+    l.trim().startsWith(">") || /^\s*[-*+]\s+/.test(l) || /^\s*\d+\.\s+/.test(l);
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (line.trim().startsWith("```")) {
+      const buf = [];
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith("```")) buf.push(lines[i++]);
+      i++;
+      blocks.push(
+        <pre key={key++} className="arc-md-pre"><code>{buf.join("\n")}</code></pre>
+      );
+      continue;
+    }
+    const h = line.match(/^(#{1,4})\s+(.*)$/);
+    if (h) {
+      const lvl = h[1].length;
+      const Tag = tags[lvl - 1];
+      blocks.push(
+        <Tag key={key++} className={hClass[lvl - 1]}>{renderInline(h[2], "h" + key)}</Tag>
+      );
+      i++;
+      continue;
+    }
+    if (/^(\*\*\*|---|___)\s*$/.test(line.trim())) {
+      blocks.push(<hr key={key++} className="arc-md-hr" />);
+      i++;
+      continue;
+    }
+    if (line.trim().startsWith(">")) {
+      const buf = [];
+      while (i < lines.length && lines[i].trim().startsWith(">")) {
+        buf.push(lines[i].trim().replace(/^>\s?/, ""));
+        i++;
+      }
+      blocks.push(
+        <blockquote key={key++} className="arc-md-quote">
+          {renderInline(buf.join(" "), "q" + key)}
+        </blockquote>
+      );
+      continue;
+    }
+    if (/^\s*[-*+]\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i]))
+        items.push(lines[i++].replace(/^\s*[-*+]\s+/, ""));
+      blocks.push(
+        <ul key={key++} className="arc-md-ul">
+          {items.map((it, idx) => <li key={idx}>{renderInline(it, "u" + key + "-" + idx)}</li>)}
+        </ul>
+      );
+      continue;
+    }
+    if (/^\s*\d+\.\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i]))
+        items.push(lines[i++].replace(/^\s*\d+\.\s+/, ""));
+      blocks.push(
+        <ol key={key++} className="arc-md-ol">
+          {items.map((it, idx) => <li key={idx}>{renderInline(it, "o" + key + "-" + idx)}</li>)}
+        </ol>
+      );
+      continue;
+    }
+    if (line.trim() === "") { i++; continue; }
+
+    const buf = [line];
+    i++;
+    while (i < lines.length && lines[i].trim() !== "" && !isSpecial(lines[i]))
+      buf.push(lines[i++]);
+    blocks.push(
+      <p key={key++} className="arc-md-p">{renderInline(buf.join(" "), "p" + key)}</p>
+    );
+  }
+  return blocks;
+}
+
 /* ------------------------------------------------------------------ *
- *  Styles — kept inline so this file renders identically whether it is
- *  built by Vite or dropped in as a standalone artifact.
+ *  Styles
  * ------------------------------------------------------------------ */
 const STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -223,9 +507,7 @@ body{
 @keyframes arcDrift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-60px,55px) scale(1.12);}}
 @keyframes arcDrift3{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(45px,45px) scale(1.22);}}
 @keyframes arcGrad{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
-@keyframes arcPulse{0%{box-shadow:0 0 0 0 rgba(255,63,92,0.55);}70%{box-shadow:0 0 0 7px rgba(255,63,92,0);}100%{box-shadow:0 0 0 0 rgba(255,63,92,0);}}
 
-/* background atmosphere */
 .arc-blob{position:fixed;border-radius:9999px;filter:blur(110px);pointer-events:none;z-index:0;will-change:transform;}
 .arc-noise{
   position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0.04;
@@ -238,18 +520,6 @@ body{
   transition:transform .12s ease-out;
 }
 
-/* status pill */
-.arc-status{
-  display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:9999px;
-  border:1px solid var(--border);background:var(--surface);
-  font-size:12px;font-weight:500;color:var(--muted);
-}
-.arc-status-dot{
-  width:7px;height:7px;border-radius:9999px;background:var(--coral);
-  animation:arcPulse 2.6s ease-out infinite;
-}
-
-/* section eyebrow label */
 .arc-eyebrow{display:flex;align-items:center;gap:11px;margin-bottom:20px;}
 .arc-eyebrow-num{font-size:12px;font-weight:600;}
 .arc-eyebrow-label{
@@ -258,7 +528,6 @@ body{
 }
 .arc-eyebrow-rule{flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent);}
 
-/* timeline */
 .arc-tl-item{position:relative;padding-left:30px;margin-bottom:15px;}
 .arc-tl-item:last-child{margin-bottom:0;}
 .arc-tl-item::before{
@@ -277,8 +546,6 @@ body{
   transform:scale(1.2);
   box-shadow:0 0 0 1.4px currentColor,0 0 16px currentColor;
 }
-
-/* clickable header */
 .arc-tl-head{
   display:block;width:100%;margin:0;padding:4px 0;
   background:none;border:none;cursor:pointer;
@@ -286,9 +553,7 @@ body{
   border-radius:8px;transition:background .25s ease;
 }
 .arc-tl-head:hover{background:rgba(255,255,255,0.018);}
-.arc-tl-org{
-  font-size:15px;font-weight:600;color:var(--text);transition:color .25s ease;
-}
+.arc-tl-org{font-size:15px;font-weight:600;color:var(--text);transition:color .25s ease;}
 .arc-tl-head:hover .arc-tl-org,
 .arc-tl-item[data-open="true"] .arc-tl-org{color:#fff;}
 .arc-tl-chev{color:var(--faint);flex-shrink:0;transition:transform .32s cubic-bezier(.2,.7,.2,1),color .25s ease;}
@@ -296,7 +561,6 @@ body{
 .arc-tl-period{font-size:11px;color:var(--faint);white-space:nowrap;flex-shrink:0;}
 .arc-tl-role{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5;}
 
-/* dropdown detail panel — grid 0fr/1fr animates to natural height */
 .arc-detail{
   display:grid;grid-template-rows:0fr;
   transition:grid-template-rows .38s cubic-bezier(.2,.7,.2,1);
@@ -311,19 +575,10 @@ body{
 .arc-detail[data-open="true"] .arc-detail-pad{opacity:1;transform:translateY(0);}
 .arc-detail-meta{font-size:11px;color:var(--faint);margin-bottom:8px;}
 .arc-detail-text{font-size:13px;line-height:1.62;color:var(--muted);}
-.arc-detail-list{
-  list-style:none;margin:11px 0 2px;padding:0;
-  display:flex;flex-direction:column;gap:7px;
-}
-.arc-detail-list li{
-  display:flex;gap:10px;font-size:13px;line-height:1.5;color:var(--muted);
-}
-.arc-detail-bullet{
-  flex-shrink:0;width:5px;height:5px;border-radius:1.5px;margin-top:6px;
-  background:currentColor;
-}
+.arc-detail-list{list-style:none;margin:11px 0 2px;padding:0;display:flex;flex-direction:column;gap:7px;}
+.arc-detail-list li{display:flex;gap:10px;font-size:13px;line-height:1.5;color:var(--muted);}
+.arc-detail-bullet{flex-shrink:0;width:5px;height:5px;border-radius:1.5px;margin-top:6px;background:currentColor;}
 
-/* links */
 .arc-link{
   color:var(--coral);text-decoration:none;display:inline-flex;align-items:center;gap:4px;
   transition:color .25s ease;
@@ -332,8 +587,21 @@ body{
 .arc-link svg{transition:transform .25s ease;}
 .arc-link:hover svg{transform:translate(2px,-2px);}
 
-/* project window — a macOS-style window used as the preview itself */
+/* project heading rendered as a title + arrow link */
+.arc-project-head{
+  display:inline-flex;align-items:flex-start;gap:3px;
+  text-decoration:none;color:var(--text);
+  transition:color .22s ease;
+}
+.arc-project-head:hover{color:#fff;}
+.arc-project-arrow{
+  color:var(--coral);margin-top:3px;flex-shrink:0;
+  transition:transform .25s ease,color .25s ease;
+}
+.arc-project-head:hover .arc-project-arrow{transform:translate(2px,-2px);color:var(--pink);}
+
 .arc-window{
+  display:block;text-decoration:none;color:inherit;
   border-radius:16px;overflow:hidden;border:1px solid var(--border);
   background:var(--surface);
   box-shadow:0 20px 52px -22px rgba(0,0,0,0.75);
@@ -347,9 +615,7 @@ body{
   display:flex;align-items:center;gap:7px;padding:12px 15px;
   background:rgba(255,255,255,0.04);border-bottom:1px solid var(--border);
 }
-.arc-windot{
-  width:11px;height:11px;border-radius:9999px;transition:transform .3s ease;
-}
+.arc-windot{width:11px;height:11px;border-radius:9999px;transition:transform .3s ease;}
 .arc-window:hover .arc-windot{transform:scale(1.12);}
 .arc-window-body{
   position:relative;height:220px;
@@ -363,7 +629,6 @@ body{
   background-size:24px 24px;
 }
 
-/* post cards */
 .arc-card{
   background:var(--surface);border:1px solid var(--border);border-radius:14px;
   color:inherit;text-decoration:none;
@@ -386,6 +651,44 @@ body{
 }
 .arc-card:hover .arc-post-arrow{opacity:1;transform:translateX(0);color:var(--coral);}
 
+/* post page + markdown */
+.arc-back{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;
+  transition:color .25s ease;
+}
+.arc-back:hover{color:var(--coral);}
+.arc-back svg{transition:transform .25s ease;}
+.arc-back:hover svg{transform:translateX(-3px);}
+.arc-md-p{font-size:15px;line-height:1.78;color:#C9C9D0;margin:0 0 18px;}
+.arc-md-h1{font-family:'Bricolage Grotesque',sans-serif;font-size:23px;font-weight:700;letter-spacing:-0.02em;margin:34px 0 13px;color:#fff;}
+.arc-md-h2{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.01em;margin:30px 0 11px;color:#fff;}
+.arc-md-h3{font-size:15px;font-weight:700;margin:24px 0 9px;color:var(--text);}
+.arc-md-h4{font-size:14px;font-weight:700;margin:20px 0 8px;color:var(--text);}
+.arc-md-ul,.arc-md-ol{margin:0 0 18px;color:#C9C9D0;font-size:15px;line-height:1.7;}
+.arc-md-ol{padding-left:20px;}
+.arc-md-ul{list-style:none;padding-left:2px;}
+.arc-md-ul li{position:relative;padding-left:18px;margin-bottom:7px;}
+.arc-md-ol li{margin-bottom:7px;}
+.arc-md-ul li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:1.5px;background:var(--coral);}
+.arc-md-link{color:var(--coral);text-decoration:none;border-bottom:1px solid rgba(255,63,92,0.35);transition:color .2s ease,border-color .2s ease;}
+.arc-md-link:hover{color:var(--pink);border-color:var(--pink);}
+.arc-md-code{
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  background:rgba(255,255,255,0.07);border:1px solid var(--border);
+  padding:1.5px 6px;border-radius:5px;color:#FFB9C5;
+}
+.arc-md-pre{
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  border-radius:12px;padding:16px 18px;overflow-x:auto;margin:0 0 18px;
+}
+.arc-md-pre code{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#D7D7DE;line-height:1.65;}
+.arc-md-quote{
+  border-left:2px solid var(--coral);padding:2px 0 2px 16px;margin:0 0 18px;
+  color:var(--muted);font-style:italic;font-size:15px;line-height:1.7;
+}
+.arc-md-hr{border:none;border-top:1px solid var(--border);margin:28px 0;}
+
 .arc-footer-line{border-top:1px solid var(--border);}
 
 @media (prefers-reduced-motion:reduce){
@@ -393,31 +696,21 @@ body{
 }
 `;
 
-/* Scroll-triggered reveal wrapper */
+/* ---------- helpers ---------- */
 function Reveal({ children, delay = 0, className = "", dataOpen }) {
   const ref = useRef(null);
   const [shown, setShown] = useState(false);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setShown(true);
-      return;
-    }
+    if (typeof IntersectionObserver === "undefined") { setShown(true); return; }
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShown(true);
-          obs.disconnect();
-        }
-      },
+      ([entry]) => { if (entry.isIntersecting) { setShown(true); obs.disconnect(); } },
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
-
   return (
     <div
       ref={ref}
@@ -437,24 +730,19 @@ function Reveal({ children, delay = 0, className = "", dataOpen }) {
 function Eyebrow({ num, label, accent }) {
   return (
     <div className="arc-eyebrow">
-      <span className="arc-eyebrow-num arc-mono" style={{ color: accent }}>
-        {num}
-      </span>
+      <span className="arc-eyebrow-num arc-mono" style={{ color: accent }}>{num}</span>
       <span className="arc-eyebrow-label">{label}</span>
       <span className="arc-eyebrow-rule" />
     </div>
   );
 }
 
-/* a single expandable timeline entry */
 function TimelineItem({ item, accent, delay }) {
   const [open, setOpen] = useState(false);
   const { details } = item;
-
   return (
     <Reveal className="arc-tl-item" delay={delay} dataOpen={open}>
       <span className="arc-tl-dot" style={{ color: accent }} />
-
       <button
         type="button"
         className="arc-tl-head"
@@ -475,7 +763,6 @@ function TimelineItem({ item, accent, delay }) {
         </div>
         <p className="arc-tl-role">{item.role}</p>
       </button>
-
       <div className="arc-detail" data-open={open}>
         <div className="arc-detail-clip">
           <div className="arc-detail-pad">
@@ -484,10 +771,7 @@ function TimelineItem({ item, accent, delay }) {
             <ul className="arc-detail-list">
               {details.highlights.map((h) => (
                 <li key={h}>
-                  <span
-                    className="arc-detail-bullet"
-                    style={{ color: accent }}
-                  />
+                  <span className="arc-detail-bullet" style={{ color: accent }} />
                   <span>{h}</span>
                 </li>
               ))}
@@ -502,27 +786,291 @@ function TimelineItem({ item, accent, delay }) {
 function TimelineSection({ num, label, accent, items }) {
   return (
     <section className="mt-16">
-      <Reveal>
-        <Eyebrow num={num} label={label} accent={accent} />
-      </Reveal>
+      <Reveal><Eyebrow num={num} label={label} accent={accent} /></Reveal>
       <div>
         {items.map((it, i) => (
-          <TimelineItem
-            key={it.org}
-            item={it}
-            accent={accent}
-            delay={i * 70}
-          />
+          <TimelineItem key={it.org} item={it} accent={accent} delay={i * 70} />
         ))}
       </div>
     </section>
   );
 }
 
+/* the macOS-style project window — used on the home page and post pages */
+function ProjectWindow({ project, href, className = "" }) {
+  const inner = (
+    <>
+      <div className="arc-window-bar">
+        <span className="arc-windot" style={{ background: "#FF3F5C" }} />
+        <span className="arc-windot" style={{ background: "#FFA0B4" }} />
+        <span className="arc-windot" style={{ background: "#3142F0" }} />
+      </div>
+      <div
+        className="arc-window-body"
+        style={{ backgroundImage: `linear-gradient(135deg, ${project.colors[0]}, ${project.colors[1]})` }}
+      >
+        <div className="arc-dots" />
+        <div className="relative text-center">
+          <div className="arc-display text-2xl font-bold text-white">{project.title}</div>
+          {project.tag && (
+            <div className="arc-mono mt-1 text-xs" style={{ color: "rgba(255,255,255,0.72)" }}>
+              {project.tag}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+  if (href) {
+    return <a href={href} className={("arc-window " + className).trim()}>{inner}</a>;
+  }
+  return <div className={("arc-window " + className).trim()}>{inner}</div>;
+}
+
+/* ---------- the home page ---------- */
+function Portfolio() {
+  return (
+    <main className="relative z-10 mx-auto max-w-xl px-6 py-16 sm:px-8 sm:py-24">
+      {/* Header */}
+      <Reveal>
+        <h1 className="arc-display text-4xl font-extrabold sm:text-5xl">
+          {profile.name}
+        </h1>
+      </Reveal>
+      <Reveal delay={70}>
+        <p className="mt-2 text-base font-medium" style={{ color: "var(--muted)" }}>
+          {profile.subtitle}
+        </p>
+      </Reveal>
+      <Reveal delay={130}>
+        <p className="mt-4 text-sm leading-relaxed sm:text-base" style={{ color: "var(--muted)" }}>
+          {profile.bio}
+        </p>
+      </Reveal>
+      <Reveal delay={190}>
+        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
+          {profile.socials.map((s) => (
+            <a
+              key={s.label}
+              href={s.href}
+              className="arc-link"
+              target={s.external ? "_blank" : undefined}
+              rel={s.external ? "noreferrer" : undefined}
+            >
+              {s.label}
+              {s.external && <ArrowUpRight size={14} strokeWidth={2.5} />}
+            </a>
+          ))}
+        </div>
+      </Reveal>
+
+      {/* Experience / Education / Leadership */}
+      {timelineSections.map((s) => (
+        <TimelineSection key={s.label} num={s.num} label={s.label} accent={s.accent} items={s.items} />
+      ))}
+
+      {/* Projects — generated from src/projects/*.md */}
+      <section className="mt-16">
+        <Reveal><Eyebrow num="04" label="Projects" accent="#FFA0B4" /></Reveal>
+        {projects.map((p, i) => {
+          const href = "#/project/" + encodeURIComponent(p.slug);
+          return (
+            <Reveal key={p.slug} delay={80} className={i === 0 ? "" : "mt-12"}>
+              <h3 className="arc-display text-lg font-bold sm:text-xl">
+                <a href={href} className="arc-project-head">
+                  {p.title}
+                  <ArrowUpRight className="arc-project-arrow" size={18} strokeWidth={2.5} />
+                </a>
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+                {p.description}
+              </p>
+              <ProjectWindow project={p} href={href} className="mt-4" />
+            </Reveal>
+          );
+        })}
+        <Reveal delay={80} className="mt-12 text-center">
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            …and many more projects in the works.
+          </p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            In the meantime, browse the full archive of
+          </p>
+          <div className="mt-3 flex justify-center">
+            <a href="#" className="arc-link text-base font-bold">
+              Everything I&rsquo;ve ever Built <ArrowUpRight size={16} strokeWidth={2.5} />
+            </a>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* Posts — generated from src/posts/*.md */}
+      <section className="mt-16">
+        <Reveal><Eyebrow num="05" label="Posts" accent="#FF3F5C" /></Reveal>
+        <div className="flex flex-col gap-3">
+          {posts.map((post, i) => {
+            const Icon = iconFor(post.icon);
+            const tint = ICON_TINTS[i % ICON_TINTS.length];
+            return (
+              <Reveal key={post.slug} delay={i * 55}>
+                <a
+                  href={"#/post/" + encodeURIComponent(post.slug)}
+                  className="arc-card flex items-start gap-4 px-4 py-4 sm:px-5"
+                >
+                  <div className="arc-iconbox h-10 w-10">
+                    <Icon size={18} strokeWidth={2} style={{ color: tint }} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="text-sm font-semibold leading-snug sm:text-base">
+                        {post.title}
+                      </h3>
+                      <span className="arc-mono shrink-0 text-xs" style={{ color: "var(--faint)" }}>
+                        {post.read}
+                      </span>
+                    </div>
+                    <p className="mt-1 truncate text-xs sm:text-sm" style={{ color: "var(--muted)" }}>
+                      {post.description}
+                    </p>
+                  </div>
+                  <ArrowUpRight className="arc-post-arrow" size={18} strokeWidth={2.25} />
+                </a>
+              </Reveal>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <Reveal className="arc-footer-line mt-16 pt-8">
+        <p className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
+          © {new Date().getFullYear()} {profile.name} — built with React &amp; Tailwind CSS
+        </p>
+      </Reveal>
+    </main>
+  );
+}
+
+/* ---------- a single post page ---------- */
+function PostView({ post }) {
+  const Icon = iconFor(post.icon);
+  return (
+    <main className="relative z-10 mx-auto max-w-xl px-6 py-16 sm:px-8 sm:py-24">
+      <Reveal>
+        <a href="#/" className="arc-back">
+          <ArrowLeft size={15} strokeWidth={2.5} /> Back to home
+        </a>
+      </Reveal>
+      <Reveal delay={70}>
+        <div className="mt-8 flex items-center gap-3">
+          <div className="arc-iconbox h-10 w-10">
+            <Icon size={18} strokeWidth={2} style={{ color: "#FF3F5C" }} />
+          </div>
+          <span className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
+            {formatDate(post.date)}
+            {post.read ? "  ·  " + post.read : ""}
+          </span>
+        </div>
+      </Reveal>
+      <Reveal delay={120}>
+        <h1 className="arc-display mt-4 text-3xl font-extrabold sm:text-4xl">
+          {post.title}
+        </h1>
+      </Reveal>
+      {post.description && (
+        <Reveal delay={170}>
+          <p className="mt-3 text-base" style={{ color: "var(--muted)" }}>
+            {post.description}
+          </p>
+        </Reveal>
+      )}
+      <Reveal delay={220}>
+        <div className="mt-8">{renderMarkdown(post.body)}</div>
+      </Reveal>
+      <Reveal className="arc-footer-line mt-14 pt-8">
+        <a href="#/" className="arc-back">
+          <ArrowLeft size={15} strokeWidth={2.5} /> Back to home
+        </a>
+      </Reveal>
+    </main>
+  );
+}
+
+/* ---------- a single project page ---------- */
+function ProjectView({ project }) {
+  return (
+    <main className="relative z-10 mx-auto max-w-xl px-6 py-16 sm:px-8 sm:py-24">
+      <Reveal>
+        <a href="#/" className="arc-back">
+          <ArrowLeft size={15} strokeWidth={2.5} /> Back to home
+        </a>
+      </Reveal>
+      <Reveal delay={70}>
+        <span className="arc-mono mt-8 block text-xs" style={{ color: "var(--faint)" }}>
+          {project.tag}
+          {project.date ? "  ·  " + formatDate(project.date) : ""}
+        </span>
+      </Reveal>
+      <Reveal delay={120}>
+        <h1 className="arc-display mt-3 text-3xl font-extrabold sm:text-4xl">
+          {project.title}
+        </h1>
+      </Reveal>
+      {project.description && (
+        <Reveal delay={170}>
+          <p className="mt-3 text-base" style={{ color: "var(--muted)" }}>
+            {project.description}
+          </p>
+        </Reveal>
+      )}
+      <Reveal delay={220}>
+        <ProjectWindow project={project} className="mt-7" />
+      </Reveal>
+      <Reveal delay={270}>
+        <div className="mt-9">{renderMarkdown(project.body)}</div>
+      </Reveal>
+      <Reveal className="arc-footer-line mt-14 pt-8">
+        <a href="#/" className="arc-back">
+          <ArrowLeft size={15} strokeWidth={2.5} /> Back to home
+        </a>
+      </Reveal>
+    </main>
+  );
+}
+
+function NotFound() {
+  return (
+    <main className="relative z-10 mx-auto max-w-xl px-6 py-24 sm:px-8">
+      <h1 className="arc-display text-3xl font-extrabold">Post not found</h1>
+      <p className="mt-3 text-sm" style={{ color: "var(--muted)" }}>
+        That post doesn&rsquo;t exist — it may have been moved or renamed.
+      </p>
+      <div className="mt-6">
+        <a href="#/" className="arc-back">
+          <ArrowLeft size={15} strokeWidth={2.5} /> Back to home
+        </a>
+      </div>
+    </main>
+  );
+}
+
+/* ---------- routing ---------- */
+function useHashRoute() {
+  const [hash, setHash] = useState(() =>
+    typeof window !== "undefined" ? window.location.hash : ""
+  );
+  useEffect(() => {
+    const on = () => setHash(window.location.hash);
+    window.addEventListener("hashchange", on);
+    return () => window.removeEventListener("hashchange", on);
+  }, []);
+  return hash;
+}
+
 export default function App() {
   const glowRef = useRef(null);
+  const hash = useHashRoute();
 
-  /* soft light that trails the cursor */
   useEffect(() => {
     const move = (e) => {
       if (glowRef.current) {
@@ -533,205 +1081,36 @@ export default function App() {
     return () => window.removeEventListener("pointermove", move);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [hash]);
+
+  const postMatch = hash.match(/^#\/post\/(.+)$/);
+  const projectMatch = hash.match(/^#\/project\/(.+)$/);
+  let view;
+  if (postMatch) {
+    const slug = decodeURIComponent(postMatch[1]);
+    const post = posts.find((p) => p.slug === slug);
+    view = post ? <PostView post={post} /> : <NotFound />;
+  } else if (projectMatch) {
+    const slug = decodeURIComponent(projectMatch[1]);
+    const project = projects.find((p) => p.slug === slug);
+    view = project ? <ProjectView project={project} /> : <NotFound />;
+  } else {
+    view = <Portfolio />;
+  }
+
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       <style>{STYLES}</style>
 
-      {/* atmospheric background */}
-      <div
-        className="arc-blob"
-        style={{ width: 380, height: 380, top: -130, left: -150, background: "#FF3F5C", opacity: 0.26, animation: "arcDrift1 19s ease-in-out infinite" }}
-      />
-      <div
-        className="arc-blob"
-        style={{ width: 440, height: 440, top: "34%", right: -200, background: "#3142F0", opacity: 0.24, animation: "arcDrift2 23s ease-in-out infinite" }}
-      />
-      <div
-        className="arc-blob"
-        style={{ width: 360, height: 360, bottom: -150, left: "22%", background: "#5B3BF0", opacity: 0.28, animation: "arcDrift3 21s ease-in-out infinite" }}
-      />
+      <div className="arc-blob" style={{ width: 380, height: 380, top: -130, left: -150, background: "#FF3F5C", opacity: 0.26, animation: "arcDrift1 19s ease-in-out infinite" }} />
+      <div className="arc-blob" style={{ width: 440, height: 440, top: "34%", right: -200, background: "#3142F0", opacity: 0.24, animation: "arcDrift2 23s ease-in-out infinite" }} />
+      <div className="arc-blob" style={{ width: 360, height: 360, bottom: -150, left: "22%", background: "#5B3BF0", opacity: 0.28, animation: "arcDrift3 21s ease-in-out infinite" }} />
       <div className="arc-noise" />
       <div ref={glowRef} className="arc-glow" />
 
-      <main className="relative z-10 mx-auto max-w-xl px-6 py-16 sm:px-8 sm:py-24">
-
-        {/* ---------- Header ---------- */}
-        <Reveal>
-          <span className="arc-status">
-            <span className="arc-status-dot" />
-            {profile.status}
-          </span>
-        </Reveal>
-        <Reveal delay={80}>
-          <h1 className="arc-display mt-5 text-4xl font-extrabold sm:text-5xl">
-            {profile.name}
-          </h1>
-        </Reveal>
-        <Reveal delay={140}>
-          <p
-            className="mt-2 text-base font-medium"
-            style={{ color: "var(--muted)" }}
-          >
-            {profile.subtitle}
-          </p>
-        </Reveal>
-        <Reveal delay={200}>
-          <p
-            className="mt-4 text-sm leading-relaxed sm:text-base"
-            style={{ color: "var(--muted)" }}
-          >
-            {profile.bio}
-          </p>
-        </Reveal>
-        <Reveal delay={260}>
-          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
-            {profile.socials.map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                className="arc-link"
-                target={s.external ? "_blank" : undefined}
-                rel={s.external ? "noreferrer" : undefined}
-              >
-                {s.label}
-                {s.external && <ArrowUpRight size={14} strokeWidth={2.5} />}
-              </a>
-            ))}
-          </div>
-        </Reveal>
-
-        {/* ---------- Experience / Education / Leadership ---------- */}
-        {timelineSections.map((s) => (
-          <TimelineSection
-            key={s.label}
-            num={s.num}
-            label={s.label}
-            accent={s.accent}
-            items={s.items}
-          />
-        ))}
-
-        {/* ---------- Projects ---------- */}
-        <section className="mt-16">
-          <Reveal>
-            <Eyebrow num="04" label="Projects" accent="#FFA0B4" />
-          </Reveal>
-          {projects.map((p, i) => (
-            <Reveal key={p.title} delay={80} className={i === 0 ? "" : "mt-12"}>
-              <div className="flex items-baseline justify-between gap-4">
-                <h3 className="arc-display text-lg font-bold sm:text-xl">
-                  {p.title}
-                </h3>
-                <a href="#" className="arc-link shrink-0 text-sm font-semibold">
-                  …more <ArrowUpRight size={14} strokeWidth={2.5} />
-                </a>
-              </div>
-              <p
-                className="mt-2 text-sm leading-relaxed"
-                style={{ color: "var(--muted)" }}
-              >
-                {p.desc}
-              </p>
-              <div className="arc-window mt-4">
-                <div className="arc-window-bar">
-                  <span className="arc-windot" style={{ background: "#FF3F5C" }} />
-                  <span className="arc-windot" style={{ background: "#FFA0B4" }} />
-                  <span className="arc-windot" style={{ background: "#3142F0" }} />
-                </div>
-                <div
-                  className="arc-window-body"
-                  style={{ backgroundImage: `linear-gradient(135deg, ${p.grad[0]}, ${p.grad[1]})` }}
-                >
-                  <div className="arc-dots" />
-                  <div className="relative text-center">
-                    <div className="arc-display text-2xl font-bold text-white">
-                      {p.title}
-                    </div>
-                    <div
-                      className="arc-mono mt-1 text-xs"
-                      style={{ color: "rgba(255,255,255,0.72)" }}
-                    >
-                      {p.tag}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-
-          {/* archive CTA */}
-          <Reveal delay={80} className="mt-12 text-center">
-            <p className="text-sm" style={{ color: "var(--muted)" }}>
-              …and many more projects in the works.
-            </p>
-            <p className="text-sm" style={{ color: "var(--muted)" }}>
-              In the meantime, browse the full archive of
-            </p>
-            <div className="mt-3 flex justify-center">
-              <a href="#" className="arc-link text-base font-bold">
-                Everything I&rsquo;ve ever Built
-                <ArrowUpRight size={16} strokeWidth={2.5} />
-              </a>
-            </div>
-          </Reveal>
-        </section>
-
-        {/* ---------- Posts ---------- */}
-        <section className="mt-16">
-          <Reveal>
-            <Eyebrow num="05" label="Posts" accent="#FF3F5C" />
-          </Reveal>
-          <div className="flex flex-col gap-3">
-            {posts.map((post, i) => {
-              const Icon = post.icon;
-              const tint = ICON_TINTS[i % ICON_TINTS.length];
-              return (
-                <Reveal key={post.title} delay={i * 55}>
-                  <a
-                    href="#"
-                    className="arc-card flex items-start gap-4 px-4 py-4 sm:px-5"
-                  >
-                    <div className="arc-iconbox h-10 w-10">
-                      <Icon size={18} strokeWidth={2} style={{ color: tint }} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="text-sm font-semibold leading-snug sm:text-base">
-                          {post.title}
-                        </h3>
-                        <span
-                          className="arc-mono shrink-0 text-xs"
-                          style={{ color: "var(--faint)" }}
-                        >
-                          {post.read}
-                        </span>
-                      </div>
-                      <p
-                        className="mt-1 truncate text-xs sm:text-sm"
-                        style={{ color: "var(--muted)" }}
-                      >
-                        {post.desc}
-                      </p>
-                    </div>
-                    <ArrowUpRight
-                      className="arc-post-arrow"
-                      size={18}
-                      strokeWidth={2.25}
-                    />
-                  </a>
-                </Reveal>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ---------- Footer ---------- */}
-        <Reveal className="arc-footer-line mt-16 pt-8">
-          <p className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
-            © {new Date().getFullYear()} {profile.name} — built with React &amp; Tailwind CSS
-          </p>
-        </Reveal>
-      </main>
+      {view}
     </div>
   );
 }
