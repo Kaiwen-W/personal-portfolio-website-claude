@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowUpRight,
+  ChevronDown,
   Sparkles,
   Wrench,
   AppWindow,
@@ -13,11 +14,14 @@ import {
 
 /* ------------------------------------------------------------------ *
  *  EDIT EVERYTHING ABOUT YOU IN THIS BLOCK
- *  Swap names, links, dates and copy. The layout adapts automatically.
+ *  Each timeline entry has a `details` object — that is what shows
+ *  inside the dropdown when the entry is clicked.
  * ------------------------------------------------------------------ */
 const profile = {
   name: "Alex Rivera",
-  bio: "Software engineer at Lumen Labs. Recently graduated from the University of Edinburgh with a degree in Computer Science. I like building small tools that make everyday things feel a little more delightful.",
+  status: "Open to new-grad roles",
+  subtitle: "Software engineer based in Edinburgh, UK",
+  bio: "I build small tools that make everyday things feel a little more delightful — usually somewhere between hardware, interfaces and the people who use them.",
   socials: [
     { label: "Twitter", href: "https://twitter.com/yourhandle", external: true },
     { label: "GitHub", href: "https://github.com/yourhandle", external: true },
@@ -27,10 +31,126 @@ const profile = {
 };
 
 const experience = [
-  { org: "Lumen Labs", role: "Software Engineer", period: "Sept 2025", grad: ["#FF3F5C", "#5B3BF0"] },
-  { org: "University of Edinburgh", role: "Computer Science", period: "2021 – 2025", grad: ["#3142F0", "#5B3BF0"] },
-  { org: "Cobalt", role: "Software Engineering Intern", period: "Summer 2024", grad: ["#5B3BF0", "#FFA0B4"] },
-  { org: "Helio", role: "Software Engineering Intern", period: "Summer 2022", grad: ["#3142F0", "#FF3F5C"] },
+  {
+    org: "Lumen Labs",
+    role: "Software Engineer",
+    period: "Sept 2025",
+    details: {
+      location: "Edinburgh, UK · Full-time",
+      summary:
+        "On the platform team, building internal tooling and developer-facing APIs used across the company.",
+      highlights: [
+        "Shipped a build service that cut average deploy times by ~40%.",
+        "Owned the migration to a shared design-system component library.",
+        "Mentor incoming interns and run weekly frontend office hours.",
+      ],
+    },
+  },
+  {
+    org: "Cobalt",
+    role: "Software Engineering Intern",
+    period: "Summer 2024",
+    details: {
+      location: "London, UK · Internship",
+      summary:
+        "Joined the payments squad for a 12-week internship focused on reliability and observability.",
+      highlights: [
+        "Built an automated reconciliation dashboard adopted by the ops team.",
+        "Added end-to-end tests covering the three highest-traffic flows.",
+      ],
+    },
+  },
+  {
+    org: "Helio",
+    role: "Software Engineering Intern",
+    period: "Summer 2022",
+    details: {
+      location: "Remote · Internship",
+      summary:
+        "First industry internship, working across the mobile app codebase.",
+      highlights: [
+        "Implemented offline caching for the activity feed.",
+        "Closed 30+ issues from the public bug tracker.",
+      ],
+    },
+  },
+];
+
+const education = [
+  {
+    org: "University of Edinburgh",
+    role: "BSc (Hons) Computer Science — First Class",
+    period: "2021–2025",
+    details: {
+      location: "Edinburgh, UK",
+      summary:
+        "Four-year honours degree focused on systems, machine learning and human-computer interaction.",
+      highlights: [
+        "Dissertation on peer-feedback tooling, later adapted into a paper.",
+        "Class representative for two consecutive years.",
+        "Coursework: Distributed Systems, Computer Vision, HCI.",
+      ],
+    },
+  },
+  {
+    org: "KTH Royal Institute of Technology",
+    role: "Exchange semester · Computer Science",
+    period: "Spring 2024",
+    details: {
+      location: "Stockholm, Sweden",
+      summary:
+        "One-semester exchange taking advanced courses not offered at home.",
+      highlights: [
+        "Studied Embedded Systems and Interaction Design.",
+        "Built a capstone project with a four-person international team.",
+      ],
+    },
+  },
+];
+
+const leadership = [
+  {
+    org: "Build Circle",
+    role: "Founder & President",
+    period: "2023–2025",
+    details: {
+      location: "University of Edinburgh",
+      summary:
+        "Founded and ran a society for students working on side projects.",
+      highlights: [
+        "Grew the community to 120+ active members.",
+        "Organised fortnightly demo nights and an end-of-year showcase.",
+        "Secured sponsorship covering venue and prize costs.",
+      ],
+    },
+  },
+  {
+    org: "Hack the Burgh",
+    role: "Organising Committee",
+    period: "2023–2024",
+    details: {
+      location: "University of Edinburgh",
+      summary: "Helped run one of Scotland's largest student hackathons.",
+      highlights: [
+        "Led logistics for 300+ attendees across the weekend.",
+        "Coordinated mentors and judging over 12 sponsor tracks.",
+      ],
+    },
+  },
+  {
+    org: "Edinburgh CompSoc",
+    role: "Student Mentor",
+    period: "2022–2023",
+    details: {
+      location: "University of Edinburgh",
+      summary:
+        "Mentored first-year students through the transition into the CS programme.",
+      highlights: [
+        "Ran weekly drop-in sessions on coursework and tooling.",
+        "Paired with 8 mentees across the academic year.",
+      ],
+    },
+  },
 ];
 
 const projects = [
@@ -65,6 +185,13 @@ const posts = [
   { icon: Briefcase, title: "Internships 102", desc: "Things I wish I knew before I started applying", read: "5 min read" },
 ];
 
+/* the three timeline blocks, in order, each with its own accent */
+const timelineSections = [
+  { num: "01", label: "Experience", accent: "#FF3F5C", items: experience },
+  { num: "02", label: "Education", accent: "#3142F0", items: education },
+  { num: "03", label: "Leadership", accent: "#5B3BF0", items: leadership },
+];
+
 const ICON_TINTS = ["#FF3F5C", "#3142F0", "#5B3BF0", "#FFA0B4"];
 
 /* ------------------------------------------------------------------ *
@@ -72,12 +199,12 @@ const ICON_TINTS = ["#FF3F5C", "#3142F0", "#5B3BF0", "#FFA0B4"];
  *  built by Vite or dropped in as a standalone artifact.
  * ------------------------------------------------------------------ */
 const STYLES = `
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root{
-  --bg:#09090C; --text:#ECECEF; --muted:#85858F;
-  --border:rgba(255,255,255,0.08);
-  --surface:rgba(255,255,255,0.022); --surface-2:rgba(255,255,255,0.045);
+  --bg:#08080B; --text:#ECECEF; --muted:#7E7E88; --faint:#56565F;
+  --border:rgba(255,255,255,0.075);
+  --surface:rgba(255,255,255,0.022); --surface-2:rgba(255,255,255,0.05);
   --coral:#FF3F5C; --pink:#FFA0B4; --blue:#3142F0; --indigo:#5B3BF0;
 }
 *{box-sizing:border-box;}
@@ -90,32 +217,113 @@ body{
 }
 ::selection{background:rgba(255,63,92,0.32);color:#fff;}
 .arc-display{font-family:'Bricolage Grotesque','Hanken Grotesk',sans-serif;letter-spacing:-0.02em;}
+.arc-mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
 
 @keyframes arcDrift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(70px,-50px) scale(1.18);}}
 @keyframes arcDrift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-60px,55px) scale(1.12);}}
 @keyframes arcDrift3{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(45px,45px) scale(1.22);}}
 @keyframes arcGrad{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+@keyframes arcPulse{0%{box-shadow:0 0 0 0 rgba(255,63,92,0.55);}70%{box-shadow:0 0 0 7px rgba(255,63,92,0);}100%{box-shadow:0 0 0 0 rgba(255,63,92,0);}}
 
+/* background atmosphere */
 .arc-blob{position:fixed;border-radius:9999px;filter:blur(110px);pointer-events:none;z-index:0;will-change:transform;}
+.arc-noise{
+  position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 .arc-glow{
   position:fixed;z-index:1;pointer-events:none;width:620px;height:620px;
   margin-left:-310px;margin-top:-310px;border-radius:9999px;
-  background:radial-gradient(circle,rgba(255,63,92,0.11) 0%,rgba(49,66,240,0.07) 38%,transparent 72%);
+  background:radial-gradient(circle,rgba(255,63,92,0.10) 0%,rgba(49,66,240,0.06) 38%,transparent 72%);
   transition:transform .12s ease-out;
 }
-.arc-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:16px;
-  color:inherit;text-decoration:none;
-  transition:transform .4s cubic-bezier(.2,.7,.2,1),border-color .4s ease,background .4s ease,box-shadow .4s ease;
+
+/* status pill */
+.arc-status{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:9999px;
+  border:1px solid var(--border);background:var(--surface);
+  font-size:12px;font-weight:500;color:var(--muted);
 }
-.arc-card:hover{
-  transform:translateY(-3px);border-color:rgba(255,63,92,0.42);background:var(--surface-2);
-  box-shadow:0 16px 44px -16px rgba(255,63,92,0.30);
+.arc-status-dot{
+  width:7px;height:7px;border-radius:9999px;background:var(--coral);
+  animation:arcPulse 2.6s ease-out infinite;
 }
-.arc-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
-.arc-panel>*+*{border-top:1px solid var(--border);}
-.arc-row{transition:background .3s ease;}
-.arc-row:hover{background:rgba(255,255,255,0.03);}
+
+/* section eyebrow label */
+.arc-eyebrow{display:flex;align-items:center;gap:11px;margin-bottom:20px;}
+.arc-eyebrow-num{font-size:12px;font-weight:600;}
+.arc-eyebrow-label{
+  font-size:12px;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.2em;color:var(--text);
+}
+.arc-eyebrow-rule{flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent);}
+
+/* timeline */
+.arc-tl-item{position:relative;padding-left:30px;margin-bottom:15px;}
+.arc-tl-item:last-child{margin-bottom:0;}
+.arc-tl-item::before{
+  content:"";position:absolute;left:6px;top:9px;width:1.5px;
+  height:calc(100% + 15px);background:var(--border);
+}
+.arc-tl-item:last-child::before{display:none;}
+.arc-tl-dot{
+  position:absolute;left:0;top:3px;width:14px;height:14px;border-radius:9999px;
+  background:currentColor;border:3.5px solid var(--bg);
+  box-shadow:0 0 0 1.4px currentColor;
+  transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s ease;
+}
+.arc-tl-item[data-open="true"] .arc-tl-dot,
+.arc-tl-item:hover .arc-tl-dot{
+  transform:scale(1.2);
+  box-shadow:0 0 0 1.4px currentColor,0 0 16px currentColor;
+}
+
+/* clickable header */
+.arc-tl-head{
+  display:block;width:100%;margin:0;padding:4px 0;
+  background:none;border:none;cursor:pointer;
+  font:inherit;color:inherit;text-align:left;
+  border-radius:8px;transition:background .25s ease;
+}
+.arc-tl-head:hover{background:rgba(255,255,255,0.018);}
+.arc-tl-org{
+  font-size:15px;font-weight:600;color:var(--text);transition:color .25s ease;
+}
+.arc-tl-head:hover .arc-tl-org,
+.arc-tl-item[data-open="true"] .arc-tl-org{color:#fff;}
+.arc-tl-chev{color:var(--faint);flex-shrink:0;transition:transform .32s cubic-bezier(.2,.7,.2,1),color .25s ease;}
+.arc-tl-head:hover .arc-tl-chev{color:var(--muted);}
+.arc-tl-period{font-size:11px;color:var(--faint);white-space:nowrap;flex-shrink:0;}
+.arc-tl-role{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5;}
+
+/* dropdown detail panel — grid 0fr/1fr animates to natural height */
+.arc-detail{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .38s cubic-bezier(.2,.7,.2,1);
+}
+.arc-detail[data-open="true"]{grid-template-rows:1fr;}
+.arc-detail-clip{overflow:hidden;}
+.arc-detail-pad{
+  padding:12px 0 4px;
+  opacity:0;transform:translateY(-4px);
+  transition:opacity .3s ease .04s,transform .3s ease .04s;
+}
+.arc-detail[data-open="true"] .arc-detail-pad{opacity:1;transform:translateY(0);}
+.arc-detail-meta{font-size:11px;color:var(--faint);margin-bottom:8px;}
+.arc-detail-text{font-size:13px;line-height:1.62;color:var(--muted);}
+.arc-detail-list{
+  list-style:none;margin:11px 0 2px;padding:0;
+  display:flex;flex-direction:column;gap:7px;
+}
+.arc-detail-list li{
+  display:flex;gap:10px;font-size:13px;line-height:1.5;color:var(--muted);
+}
+.arc-detail-bullet{
+  flex-shrink:0;width:5px;height:5px;border-radius:1.5px;margin-top:6px;
+  background:currentColor;
+}
+
+/* links */
 .arc-link{
   color:var(--coral);text-decoration:none;display:inline-flex;align-items:center;gap:4px;
   transition:color .25s ease;
@@ -123,45 +331,70 @@ body{
 .arc-link:hover{color:var(--pink);}
 .arc-link svg{transition:transform .25s ease;}
 .arc-link:hover svg{transform:translate(2px,-2px);}
-.arc-mono{
-  display:flex;align-items:center;justify-content:center;border-radius:11px;
-  color:#fff;font-weight:700;font-size:13px;flex-shrink:0;
-  box-shadow:0 4px 14px -4px rgba(0,0,0,0.6);
+
+/* project window — a macOS-style window used as the preview itself */
+.arc-window{
+  border-radius:16px;overflow:hidden;border:1px solid var(--border);
+  background:var(--surface);
+  box-shadow:0 20px 52px -22px rgba(0,0,0,0.75);
+  transition:transform .45s cubic-bezier(.2,.7,.2,1),border-color .4s ease,box-shadow .4s ease;
 }
-.arc-iconbox{
-  display:flex;align-items:center;justify-content:center;border-radius:12px;
-  background:rgba(255,255,255,0.04);border:1px solid var(--border);flex-shrink:0;
-  transition:border-color .35s ease,background .35s ease,transform .35s ease;
+.arc-window:hover{
+  transform:translateY(-4px);border-color:rgba(255,63,92,0.4);
+  box-shadow:0 28px 64px -24px rgba(0,0,0,0.85);
 }
-.arc-card:hover .arc-iconbox{border-color:rgba(255,63,92,0.30);background:rgba(255,63,92,0.07);}
-.arc-preview{
-  position:relative;height:240px;border-radius:16px;overflow:hidden;
+.arc-window-bar{
+  display:flex;align-items:center;gap:7px;padding:12px 15px;
+  background:rgba(255,255,255,0.04);border-bottom:1px solid var(--border);
+}
+.arc-windot{
+  width:11px;height:11px;border-radius:9999px;transition:transform .3s ease;
+}
+.arc-window:hover .arc-windot{transform:scale(1.12);}
+.arc-window-body{
+  position:relative;height:220px;
+  display:flex;align-items:center;justify-content:center;
   background-size:220% 220%;animation:arcGrad 11s ease infinite;
-  box-shadow:inset 0 0 90px rgba(0,0,0,0.55);border:1px solid var(--border);
+  box-shadow:inset 0 0 90px rgba(0,0,0,0.45);
 }
 .arc-dots{
   position:absolute;inset:0;opacity:.7;
   background-image:radial-gradient(rgba(255,255,255,0.16) 1px,transparent 1px);
   background-size:24px 24px;
 }
-.arc-glass{
-  width:256px;border-radius:14px;overflow:hidden;
-  border:1px solid rgba(255,255,255,0.22);background:rgba(255,255,255,0.10);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  box-shadow:0 18px 50px -12px rgba(0,0,0,0.6);
-  transition:transform .45s cubic-bezier(.2,.7,.2,1);
+
+/* post cards */
+.arc-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  color:inherit;text-decoration:none;
+  transition:transform .4s cubic-bezier(.2,.7,.2,1),border-color .4s ease,background .4s ease,box-shadow .4s ease;
 }
-.arc-preview:hover .arc-glass{transform:translateY(-5px);}
-.arc-glassbar{display:flex;gap:6px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.18);}
-.arc-windot{width:9px;height:9px;border-radius:9999px;}
+.arc-card:hover{
+  transform:translateY(-3px);border-color:rgba(255,63,92,0.42);background:var(--surface-2);
+  box-shadow:0 16px 44px -16px rgba(255,63,92,0.30);
+}
+.arc-iconbox{
+  display:flex;align-items:center;justify-content:center;border-radius:11px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);flex-shrink:0;
+  transition:border-color .35s ease,background .35s ease;
+}
+.arc-card:hover .arc-iconbox{border-color:rgba(255,63,92,0.30);background:rgba(255,63,92,0.07);}
+.arc-post-arrow{
+  color:var(--faint);flex-shrink:0;align-self:center;
+  opacity:0;transform:translateX(-5px);
+  transition:opacity .3s ease,transform .3s ease,color .3s ease;
+}
+.arc-card:hover .arc-post-arrow{opacity:1;transform:translateX(0);color:var(--coral);}
+
 .arc-footer-line{border-top:1px solid var(--border);}
+
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important;}
 }
 `;
 
 /* Scroll-triggered reveal wrapper */
-function Reveal({ children, delay = 0, className = "" }) {
+function Reveal({ children, delay = 0, className = "", dataOpen }) {
   const ref = useRef(null);
   const [shown, setShown] = useState(false);
 
@@ -189,6 +422,7 @@ function Reveal({ children, delay = 0, className = "" }) {
     <div
       ref={ref}
       className={className}
+      data-open={dataOpen}
       style={{
         opacity: shown ? 1 : 0,
         transform: shown ? "translateY(0)" : "translateY(22px)",
@@ -197,6 +431,91 @@ function Reveal({ children, delay = 0, className = "" }) {
     >
       {children}
     </div>
+  );
+}
+
+function Eyebrow({ num, label, accent }) {
+  return (
+    <div className="arc-eyebrow">
+      <span className="arc-eyebrow-num arc-mono" style={{ color: accent }}>
+        {num}
+      </span>
+      <span className="arc-eyebrow-label">{label}</span>
+      <span className="arc-eyebrow-rule" />
+    </div>
+  );
+}
+
+/* a single expandable timeline entry */
+function TimelineItem({ item, accent, delay }) {
+  const [open, setOpen] = useState(false);
+  const { details } = item;
+
+  return (
+    <Reveal className="arc-tl-item" delay={delay} dataOpen={open}>
+      <span className="arc-tl-dot" style={{ color: accent }} />
+
+      <button
+        type="button"
+        className="arc-tl-head"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="flex items-center gap-2">
+            <span className="arc-tl-org">{item.org}</span>
+            <ChevronDown
+              className="arc-tl-chev"
+              size={15}
+              strokeWidth={2.5}
+              style={{ transform: open ? "rotate(180deg)" : "none" }}
+            />
+          </span>
+          <span className="arc-tl-period arc-mono">{item.period}</span>
+        </div>
+        <p className="arc-tl-role">{item.role}</p>
+      </button>
+
+      <div className="arc-detail" data-open={open}>
+        <div className="arc-detail-clip">
+          <div className="arc-detail-pad">
+            <div className="arc-detail-meta arc-mono">{details.location}</div>
+            <p className="arc-detail-text">{details.summary}</p>
+            <ul className="arc-detail-list">
+              {details.highlights.map((h) => (
+                <li key={h}>
+                  <span
+                    className="arc-detail-bullet"
+                    style={{ color: accent }}
+                  />
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+function TimelineSection({ num, label, accent, items }) {
+  return (
+    <section className="mt-16">
+      <Reveal>
+        <Eyebrow num={num} label={label} accent={accent} />
+      </Reveal>
+      <div>
+        {items.map((it, i) => (
+          <TimelineItem
+            key={it.org}
+            item={it}
+            accent={accent}
+            delay={i * 70}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -221,27 +540,42 @@ export default function App() {
       {/* atmospheric background */}
       <div
         className="arc-blob"
-        style={{ width: 380, height: 380, top: -130, left: -150, background: "#FF3F5C", opacity: 0.28, animation: "arcDrift1 19s ease-in-out infinite" }}
+        style={{ width: 380, height: 380, top: -130, left: -150, background: "#FF3F5C", opacity: 0.26, animation: "arcDrift1 19s ease-in-out infinite" }}
       />
       <div
         className="arc-blob"
-        style={{ width: 440, height: 440, top: "34%", right: -200, background: "#3142F0", opacity: 0.26, animation: "arcDrift2 23s ease-in-out infinite" }}
+        style={{ width: 440, height: 440, top: "34%", right: -200, background: "#3142F0", opacity: 0.24, animation: "arcDrift2 23s ease-in-out infinite" }}
       />
       <div
         className="arc-blob"
-        style={{ width: 360, height: 360, bottom: -150, left: "22%", background: "#5B3BF0", opacity: 0.3, animation: "arcDrift3 21s ease-in-out infinite" }}
+        style={{ width: 360, height: 360, bottom: -150, left: "22%", background: "#5B3BF0", opacity: 0.28, animation: "arcDrift3 21s ease-in-out infinite" }}
       />
+      <div className="arc-noise" />
       <div ref={glowRef} className="arc-glow" />
 
       <main className="relative z-10 mx-auto max-w-xl px-6 py-16 sm:px-8 sm:py-24">
 
         {/* ---------- Header ---------- */}
         <Reveal>
-          <h1 className="arc-display text-4xl font-extrabold sm:text-5xl">
+          <span className="arc-status">
+            <span className="arc-status-dot" />
+            {profile.status}
+          </span>
+        </Reveal>
+        <Reveal delay={80}>
+          <h1 className="arc-display mt-5 text-4xl font-extrabold sm:text-5xl">
             {profile.name}
           </h1>
         </Reveal>
-        <Reveal delay={90}>
+        <Reveal delay={140}>
+          <p
+            className="mt-2 text-base font-medium"
+            style={{ color: "var(--muted)" }}
+          >
+            {profile.subtitle}
+          </p>
+        </Reveal>
+        <Reveal delay={200}>
           <p
             className="mt-4 text-sm leading-relaxed sm:text-base"
             style={{ color: "var(--muted)" }}
@@ -249,7 +583,7 @@ export default function App() {
             {profile.bio}
           </p>
         </Reveal>
-        <Reveal delay={170}>
+        <Reveal delay={260}>
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
             {profile.socials.map((s) => (
               <a
@@ -266,142 +600,135 @@ export default function App() {
           </div>
         </Reveal>
 
-        {/* ---------- Experience ---------- */}
-        <Reveal delay={120} className="mt-14">
-          <div className="arc-panel">
-            {experience.map((e) => (
-              <div
-                key={e.org}
-                className="arc-row flex items-center gap-3 px-4 py-4 sm:px-5"
-              >
-                <div
-                  className="arc-mono h-9 w-9"
-                  style={{ backgroundImage: `linear-gradient(140deg, ${e.grad[0]}, ${e.grad[1]})` }}
-                >
-                  {e.org.charAt(0)}
-                </div>
-                <span className="truncate text-sm font-semibold sm:text-base">
-                  {e.org}
-                </span>
-                <span
-                  className="ml-auto shrink-0 text-right text-xs sm:text-sm"
-                  style={{ color: "var(--muted)" }}
-                >
-                  {e.role} · {e.period}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Reveal>
+        {/* ---------- Experience / Education / Leadership ---------- */}
+        {timelineSections.map((s) => (
+          <TimelineSection
+            key={s.label}
+            num={s.num}
+            label={s.label}
+            accent={s.accent}
+            items={s.items}
+          />
+        ))}
 
         {/* ---------- Projects ---------- */}
-        {projects.map((p) => (
-          <Reveal key={p.title} delay={80} className="mt-14">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="arc-display text-lg font-bold sm:text-xl">
-                {p.title}
-              </h2>
-              <a href="#" className="arc-link shrink-0 text-sm font-semibold">
-                …more <ArrowUpRight size={14} strokeWidth={2.5} />
-              </a>
-            </div>
-            <p
-              className="mt-2 text-sm leading-relaxed"
-              style={{ color: "var(--muted)" }}
-            >
-              {p.desc}
-            </p>
-            <div
-              className="arc-preview mt-4"
-              style={{ backgroundImage: `linear-gradient(135deg, ${p.grad[0]}, ${p.grad[1]})` }}
-            >
-              <div className="arc-dots" />
-              <div className="absolute inset-0 flex items-center justify-center p-6">
-                <div className="arc-glass">
-                  <div className="arc-glassbar">
-                    <span className="arc-windot" style={{ background: "#FF3F5C" }} />
-                    <span className="arc-windot" style={{ background: "#FFA0B4" }} />
-                    <span className="arc-windot" style={{ background: "#3142F0" }} />
-                  </div>
-                  <div className="px-4 py-6 text-center">
-                    <div className="arc-display text-base font-bold text-white">
+        <section className="mt-16">
+          <Reveal>
+            <Eyebrow num="04" label="Projects" accent="#FFA0B4" />
+          </Reveal>
+          {projects.map((p, i) => (
+            <Reveal key={p.title} delay={80} className={i === 0 ? "" : "mt-12"}>
+              <div className="flex items-baseline justify-between gap-4">
+                <h3 className="arc-display text-lg font-bold sm:text-xl">
+                  {p.title}
+                </h3>
+                <a href="#" className="arc-link shrink-0 text-sm font-semibold">
+                  …more <ArrowUpRight size={14} strokeWidth={2.5} />
+                </a>
+              </div>
+              <p
+                className="mt-2 text-sm leading-relaxed"
+                style={{ color: "var(--muted)" }}
+              >
+                {p.desc}
+              </p>
+              <div className="arc-window mt-4">
+                <div className="arc-window-bar">
+                  <span className="arc-windot" style={{ background: "#FF3F5C" }} />
+                  <span className="arc-windot" style={{ background: "#FFA0B4" }} />
+                  <span className="arc-windot" style={{ background: "#3142F0" }} />
+                </div>
+                <div
+                  className="arc-window-body"
+                  style={{ backgroundImage: `linear-gradient(135deg, ${p.grad[0]}, ${p.grad[1]})` }}
+                >
+                  <div className="arc-dots" />
+                  <div className="relative text-center">
+                    <div className="arc-display text-2xl font-bold text-white">
                       {p.title}
                     </div>
                     <div
-                      className="mt-1 text-xs font-medium"
-                      style={{ color: "rgba(255,255,255,0.7)" }}
+                      className="arc-mono mt-1 text-xs"
+                      style={{ color: "rgba(255,255,255,0.72)" }}
                     >
                       {p.tag}
                     </div>
                   </div>
                 </div>
               </div>
+            </Reveal>
+          ))}
+
+          {/* archive CTA */}
+          <Reveal delay={80} className="mt-12 text-center">
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
+              …and many more projects in the works.
+            </p>
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
+              In the meantime, browse the full archive of
+            </p>
+            <div className="mt-3 flex justify-center">
+              <a href="#" className="arc-link text-base font-bold">
+                Everything I&rsquo;ve ever Built
+                <ArrowUpRight size={16} strokeWidth={2.5} />
+              </a>
             </div>
           </Reveal>
-        ))}
-
-        {/* ---------- Archive CTA ---------- */}
-        <Reveal delay={80} className="mt-14 text-center">
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            …and many more projects in the works.
-          </p>
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            In the meantime, browse the full archive of
-          </p>
-          <div className="mt-3 flex justify-center">
-            <a href="#" className="arc-link text-base font-bold">
-              Everything I&rsquo;ve ever Built
-              <ArrowUpRight size={16} strokeWidth={2.5} />
-            </a>
-          </div>
-        </Reveal>
+        </section>
 
         {/* ---------- Posts ---------- */}
-        <Reveal className="mt-20">
-          <h2 className="arc-display text-2xl font-extrabold">Posts</h2>
-        </Reveal>
-        <div className="mt-6 flex flex-col gap-3">
-          {posts.map((post, i) => {
-            const Icon = post.icon;
-            const tint = ICON_TINTS[i % ICON_TINTS.length];
-            return (
-              <Reveal key={post.title} delay={i * 55}>
-                <a
-                  href="#"
-                  className="arc-card flex items-start gap-4 px-4 py-4 sm:px-5"
-                >
-                  <div className="arc-iconbox h-10 w-10">
-                    <Icon size={18} strokeWidth={2} style={{ color: tint }} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-sm font-semibold leading-snug sm:text-base">
-                        {post.title}
-                      </h3>
-                      <span
-                        className="shrink-0 text-xs"
+        <section className="mt-16">
+          <Reveal>
+            <Eyebrow num="05" label="Posts" accent="#FF3F5C" />
+          </Reveal>
+          <div className="flex flex-col gap-3">
+            {posts.map((post, i) => {
+              const Icon = post.icon;
+              const tint = ICON_TINTS[i % ICON_TINTS.length];
+              return (
+                <Reveal key={post.title} delay={i * 55}>
+                  <a
+                    href="#"
+                    className="arc-card flex items-start gap-4 px-4 py-4 sm:px-5"
+                  >
+                    <div className="arc-iconbox h-10 w-10">
+                      <Icon size={18} strokeWidth={2} style={{ color: tint }} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="text-sm font-semibold leading-snug sm:text-base">
+                          {post.title}
+                        </h3>
+                        <span
+                          className="arc-mono shrink-0 text-xs"
+                          style={{ color: "var(--faint)" }}
+                        >
+                          {post.read}
+                        </span>
+                      </div>
+                      <p
+                        className="mt-1 truncate text-xs sm:text-sm"
                         style={{ color: "var(--muted)" }}
                       >
-                        {post.read}
-                      </span>
+                        {post.desc}
+                      </p>
                     </div>
-                    <p
-                      className="mt-1 truncate text-xs sm:text-sm"
-                      style={{ color: "var(--muted)" }}
-                    >
-                      {post.desc}
-                    </p>
-                  </div>
-                </a>
-              </Reveal>
-            );
-          })}
-        </div>
+                    <ArrowUpRight
+                      className="arc-post-arrow"
+                      size={18}
+                      strokeWidth={2.25}
+                    />
+                  </a>
+                </Reveal>
+              );
+            })}
+          </div>
+        </section>
 
         {/* ---------- Footer ---------- */}
-        <Reveal className="arc-footer-line mt-20 pt-8">
-          <p className="text-xs" style={{ color: "var(--muted)" }}>
-            © {new Date().getFullYear()} {profile.name} · Built with React &amp; Tailwind CSS
+        <Reveal className="arc-footer-line mt-16 pt-8">
+          <p className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
+            © {new Date().getFullYear()} {profile.name} — built with React &amp; Tailwind CSS
           </p>
         </Reveal>
       </main>

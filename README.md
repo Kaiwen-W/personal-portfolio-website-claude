@@ -16,8 +16,10 @@ npm run build    # outputs to /dist
 Open `src/App.jsx`. Everything you need to edit lives in the clearly marked
 block at the top of the file:
 
-- `profile` — your name, bio and social links
-- `experience` — your roles (the coloured monogram is the first letter)
+- `profile` — your name, status pill, subtitle, bio and social links
+- `experience` — your work roles
+- `education` — degrees, exchanges, courses
+- `leadership` — societies, committees, mentoring roles
 - `projects` — title, one-line tag and description for each project
 - `posts` — your writing, each with an icon, title, blurb and read time
 
