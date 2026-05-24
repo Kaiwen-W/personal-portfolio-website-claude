@@ -9,6 +9,7 @@ import IndexView from "./pages/IndexView.jsx";
 import NowView from "./pages/NowView.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ReadingProgress from "./components/ReadingProgress.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
 
 /* Map a hash to a route key — used both for rendering and to decide
    when to play a view transition (route changed) vs. not (anchor). */
@@ -105,6 +106,7 @@ export default function App() {
   return (
     <div className="relative min-h-screen w-full">
       <Background />
+      <ThemeToggle />
       {(postMatch || projectMatch) && <ReadingProgress key={routeKey} />}
       {view}
     </div>
