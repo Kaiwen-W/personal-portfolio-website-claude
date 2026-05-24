@@ -66,8 +66,8 @@ export function resolveAsset(src) {
   return base + src.replace(/^\//, "");
 }
 
-/* inline spans: `code`, **bold**, *italic*, _italic_, [text](url) */
-function renderInline(text, kp) {
+/* inline spans: `code`, **bold**, *italic*, _italic_, ![img](src), [link](url) */
+export function renderInline(text, kp) {
   const out = [];
   let rest = text;
   let k = 0;
@@ -99,8 +99,15 @@ function renderInline(text, kp) {
       );
     } else {
       const lm = t.match(/\[([^\]]+)\]\(([^)]+)\)/);
+      const external = /^https?:\/\//.test(lm[2]);
       out.push(
-        <a key={kp + k} href={lm[2]} className="arc-md-link" target="_blank" rel="noreferrer">
+        <a
+          key={kp + k}
+          href={lm[2]}
+          className="arc-md-link"
+          target={external ? "_blank" : undefined}
+          rel={external ? "noreferrer" : undefined}
+        >
           {lm[1]}
         </a>
       );
@@ -109,6 +116,12 @@ function renderInline(text, kp) {
     k++;
   }
   return out;
+}
+
+/* Renders any plain string with inline Markdown — links, bold, italic,
+   code. Use it for text coming from data.js:  <Rich text={item.role} /> */
+export function Rich({ text }) {
+  return renderInline(String(text ?? ""), "r");
 }
 
 /* block-level parser -> array of React elements */

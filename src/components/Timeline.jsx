@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { Rich } from "../lib/markdown.jsx";
 import Reveal from "./Reveal.jsx";
 import Eyebrow from "./Eyebrow.jsx";
 
@@ -20,7 +21,7 @@ function TimelineItem({ item, accent, delay }) {
       >
         <div className="flex items-baseline justify-between gap-3">
           <span className="flex items-center gap-2">
-            <span className="arc-tl-org">{item.org}</span>
+            <span className="arc-tl-org"><Rich text={item.org} /></span>
             <ChevronDown
               className="arc-tl-chev"
               size={15}
@@ -28,21 +29,21 @@ function TimelineItem({ item, accent, delay }) {
               style={{ transform: open ? "rotate(180deg)" : "none" }}
             />
           </span>
-          <span className="arc-tl-period arc-mono">{item.period}</span>
+          <span className="arc-tl-period arc-mono"><Rich text={item.period} /></span>
         </div>
-        <p className="arc-tl-role">{item.role}</p>
+        <p className="arc-tl-role"><Rich text={item.role} /></p>
       </button>
 
       <div className="arc-detail" data-open={open}>
         <div className="arc-detail-clip">
           <div className="arc-detail-pad">
-            <div className="arc-detail-meta arc-mono">{details.location}</div>
-            <p className="arc-detail-text">{details.summary}</p>
+            <div className="arc-detail-meta arc-mono"><Rich text={details.location} /></div>
+            <p className="arc-detail-text"><Rich text={details.summary} /></p>
             <ul className="arc-detail-list">
               {details.highlights.map((h) => (
                 <li key={h}>
                   <span className="arc-detail-bullet" style={{ color: accent }} />
-                  <span>{h}</span>
+                  <span><Rich text={h} /></span>
                 </li>
               ))}
             </ul>

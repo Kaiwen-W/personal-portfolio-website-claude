@@ -2,14 +2,20 @@
  *  EDIT EVERYTHING ABOUT YOU IN THIS FILE
  * ==================================================================
  *  Posts and projects are NOT here — they are Markdown files in
- *  `src/posts/` and `src/projects/`. Add a file there and it appears
- *  automatically. This file holds the bio and CV-style entries only.
+ *  `src/posts/` and `src/projects/`. This file holds the bio and the
+ *  CV-style entries only.
+ *
+ *  Any text string below accepts inline Markdown:
+ *    [links](https://...), [in-page links](#posts), **bold**, *italic*,
+ *    `code`.
+ *  Caveat: avoid a [link]() inside an entry's `org` or a social
+ *  `label` — that text already sits inside a clickable element.
  * ================================================================== */
 
 export const profile = {
   name: "Alex Rivera",
   subtitle: "Software engineer based in Edinburgh, UK",
-  bio: "I build small tools that make everyday things feel a little more delightful — usually somewhere between hardware, interfaces and the people who use them.",
+  bio: "I build small tools that make everyday things feel a little more delightful — usually somewhere between hardware, interfaces and the people who use them. Most of it ends up on [GitHub](https://github.com/yourhandle).",
   socials: [
     { label: "Twitter", href: "https://twitter.com/yourhandle", external: true },
     { label: "GitHub", href: "https://github.com/yourhandle", external: true },

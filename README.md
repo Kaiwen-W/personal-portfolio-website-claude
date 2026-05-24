@@ -96,7 +96,7 @@ so `colors` is still worth setting. (`Pulse` ships with a placeholder image at
 
 Open `src/data.js` — it holds the bio and CV-style entries:
 
-- `profile` — your name, subtitle, bio and social links
+- `profile`, `experience`, `education`, `leadership` — every text string here accepts inline Markdown (links, bold, italic, code)
 - `experience` — work roles (with an expandable `details` dropdown)
 - `education` — degrees, exchanges, courses
 - `leadership` — societies, committees, mentoring roles

@@ -3,6 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { profile, timelineSections, navItems, ICON_TINTS } from "../data.js";
 import { posts, projects } from "../content.js";
 import { iconFor } from "../lib/icons.js";
+import { Rich } from "../lib/markdown.jsx";
 import Reveal from "../components/Reveal.jsx";
 import Eyebrow from "../components/Eyebrow.jsx";
 import TimelineSection from "../components/Timeline.jsx";
@@ -59,17 +60,17 @@ export default function Portfolio() {
         <aside className="mx-auto max-w-xl pt-14 lg:mx-0 lg:max-w-none lg:w-72 lg:shrink-0 lg:self-start lg:sticky lg:top-0 lg:py-16">
           <Reveal>
             <h1 className="arc-display text-3xl font-extrabold sm:text-4xl">
-              {profile.name}
+              <Rich text={profile.name} />
             </h1>
           </Reveal>
           <Reveal delay={70}>
             <p className="mt-2 text-sm font-medium" style={{ color: "var(--muted)" }}>
-              {profile.subtitle}
+              <Rich text={profile.subtitle} />
             </p>
           </Reveal>
           <Reveal delay={130}>
             <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
-              {profile.bio}
+              <Rich text={profile.bio} />
             </p>
           </Reveal>
           <Reveal delay={190}>
@@ -82,7 +83,7 @@ export default function Portfolio() {
                   target={s.external ? "_blank" : undefined}
                   rel={s.external ? "noreferrer" : undefined}
                 >
-                  {s.label}
+                  <Rich text={s.label} />
                   {s.external && <ArrowUpRight size={13} strokeWidth={2.5} />}
                 </a>
               ))}
