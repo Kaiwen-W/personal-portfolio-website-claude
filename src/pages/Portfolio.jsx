@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { profile, timelineSections, navItems, ICON_TINTS } from "../data.js";
 import { posts, projects } from "../content.js";
-import { iconFor } from "../lib/icons.js";
 import { Rich } from "../lib/markdown.jsx";
 import Reveal from "../components/Reveal.jsx";
 import Eyebrow from "../components/Eyebrow.jsx";
 import TimelineSection from "../components/Timeline.jsx";
-import ProjectWindow from "../components/ProjectWindow.jsx";
+import PostCard from "../components/PostCard.jsx";
+import ProjectCard from "../components/ProjectCard.jsx";
 
 export default function Portfolio() {
   const [active, setActive] = useState("experience");
@@ -128,23 +128,11 @@ export default function Portfolio() {
               <Eyebrow num="04" label="Projects" accent="#FFA0B4" />
             </Reveal>
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2">
-              {projects.map((p, i) => {
-                const href = "#/project/" + encodeURIComponent(p.slug);
-                return (
-                  <Reveal key={p.slug} delay={i * 70}>
-                    <h3 className="arc-display text-lg font-bold">
-                      <a href={href} className="arc-project-head">
-                        {p.title}
-                        <ArrowUpRight className="arc-project-arrow" size={17} strokeWidth={2.5} />
-                      </a>
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
-                      {p.description}
-                    </p>
-                    <ProjectWindow project={p} href={href} className="mt-4" compact />
-                  </Reveal>
-                );
-              })}
+              {projects.map((p, i) => (
+                <Reveal key={p.slug} delay={i * 70}>
+                  <ProjectCard project={p} />
+                </Reveal>
+              ))}
             </div>
             <Reveal delay={80} className="mt-12 text-center">
               <p className="text-sm" style={{ color: "var(--muted)" }}>
@@ -154,7 +142,7 @@ export default function Portfolio() {
                 In the meantime, browse the full archive of
               </p>
               <div className="mt-3 flex justify-center">
-                <a href="#" className="arc-link text-base font-bold">
+                <a href="#/projects" className="arc-link text-base font-bold">
                   Everything I&rsquo;ve ever Built <ArrowUpRight size={16} strokeWidth={2.5} />
                 </a>
               </div>
@@ -167,37 +155,17 @@ export default function Portfolio() {
               <Eyebrow num="05" label="Posts" accent="#FF3F5C" />
             </Reveal>
             <div className="flex flex-col gap-3">
-              {posts.map((post, i) => {
-                const Icon = iconFor(post.icon);
-                const tint = ICON_TINTS[i % ICON_TINTS.length];
-                return (
-                  <Reveal key={post.slug} delay={i * 55}>
-                    <a
-                      href={"#/post/" + encodeURIComponent(post.slug)}
-                      className="arc-card flex items-start gap-4 px-4 py-4 sm:px-5"
-                    >
-                      <div className="arc-iconbox h-10 w-10">
-                        <Icon size={18} strokeWidth={2} style={{ color: tint }} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <h3 className="text-sm font-semibold leading-snug sm:text-base">
-                            {post.title}
-                          </h3>
-                          <span className="arc-mono shrink-0 text-xs" style={{ color: "var(--faint)" }}>
-                            {post.read}
-                          </span>
-                        </div>
-                        <p className="mt-1 truncate text-xs sm:text-sm" style={{ color: "var(--muted)" }}>
-                          {post.description}
-                        </p>
-                      </div>
-                      <ArrowUpRight className="arc-post-arrow" size={18} strokeWidth={2.25} />
-                    </a>
-                  </Reveal>
-                );
-              })}
+              {posts.map((post, i) => (
+                <Reveal key={post.slug} delay={i * 55}>
+                  <PostCard post={post} tint={ICON_TINTS[i % ICON_TINTS.length]} />
+                </Reveal>
+              ))}
             </div>
+            <Reveal delay={60} className="mt-7 flex justify-center">
+              <a href="#/posts" className="arc-link text-sm font-bold">
+                Read all posts <ArrowUpRight size={15} strokeWidth={2.5} />
+              </a>
+            </Reveal>
           </section>
 
           {/* Footer */}

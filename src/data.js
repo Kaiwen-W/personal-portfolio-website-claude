@@ -17,6 +17,7 @@ export const profile = {
   subtitle: "Software engineer based in Edinburgh, UK",
   bio: "I build small tools that make everyday things feel a little more delightful — usually somewhere between hardware, interfaces and the people who use them. Most of it ends up on [GitHub](https://github.com/yourhandle).",
   socials: [
+    { label: "Now", href: "#/now", external: false },
     { label: "Twitter", href: "https://twitter.com/yourhandle", external: true },
     { label: "GitHub", href: "https://github.com/yourhandle", external: true },
     { label: "LinkedIn", href: "https://linkedin.com/in/yourhandle", external: true },

@@ -208,6 +208,17 @@ body{
   transition:transform .12s linear;
 }
 
+/* smooth cross-fade between routes (View Transitions API) */
+::view-transition-old(root),
+::view-transition-new(root){
+  animation-duration:.32s;
+  animation-timing-function:cubic-bezier(.4,0,.2,1);
+}
+@media (prefers-reduced-motion:reduce){
+  ::view-transition-old(root),
+  ::view-transition-new(root){animation:none;}
+}
+
 /* prev / next navigation */
 .arc-pn{
   display:flex;justify-content:space-between;gap:24px;margin-top:36px;

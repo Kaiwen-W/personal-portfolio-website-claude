@@ -10,6 +10,7 @@ import {
   slugFromPath,
   parseColors,
 } from "./lib/markdown.jsx";
+import nowRaw from "./now.md?raw";
 
 const byDateDesc = (a, b) => String(b.date).localeCompare(String(a.date));
 
@@ -57,3 +58,10 @@ export const projects = Object.entries(rawProjects)
     };
   })
   .sort(byDateDesc);
+
+/* ---- now page (src/now.md) ---- */
+const nowParsed = parseFrontmatter(nowRaw);
+export const now = {
+  updated: nowParsed.data.updated || "",
+  body: nowParsed.body,
+};
