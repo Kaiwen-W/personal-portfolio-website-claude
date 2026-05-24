@@ -23,7 +23,10 @@ export default function Portfolio() {
       ticking = false;
       const vh = window.innerHeight;
       const doc = document.documentElement;
-      const line = vh * 0.35;
+      /* Fixed threshold keeps behaviour consistent across viewport
+         sizes — a section becomes "active" only once its heading is
+         within 100 px of the viewport top. */
+      const line = 100;
 
       let current = navItems[0].id;
       for (const n of navItems) {

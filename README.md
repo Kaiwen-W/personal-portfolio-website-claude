@@ -66,6 +66,12 @@ Create `src/projects/my-project.md`:
 The project appears in the Projects section automatically, with its own page
 at `#/project/<filename>`.
 
+Examples of colors:
+- colors: #FF3F5C, #5B3BF0
+- colors: #3142F0, #FF3F5C
+- colors: #5B3BF0, #FFA0B4
+
+
 ### Images inside post / project text
 
 To put an image in the body of a post or project, use normal Markdown

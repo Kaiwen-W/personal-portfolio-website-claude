@@ -101,9 +101,8 @@ export const leadership = [
       summary:
         "President for the 2026 - 2027 Academic Year for Scotland's largest tech society with 25+ years of history.",
       highlights: [
-        "Grew the community to 120+ active members.",
-        "Organised fortnightly demo nights and an end-of-year showcase.",
-        "Secured sponsorship covering venue and prize costs.",
+        "Currently trying to get sponsors.",
+        "Previously first year representative where I acted as a liason for 400 first years, and co-organised events such as HackTheBurgh, InfBall and STMUs. ",
       ],
     },
   },
@@ -112,7 +111,7 @@ export const leadership = [
     role: "Campus Ambassador",
     period: "May 2026 - Present",
     details: {
-      location: "Glasgow",
+      location: "University of Edinburgh",
       summary: "Organising cool meetups pre-University.",
       highlights: [
         "Organised technical meetups, curating speakers from top tech companies, serving a community of 200+ developers",
