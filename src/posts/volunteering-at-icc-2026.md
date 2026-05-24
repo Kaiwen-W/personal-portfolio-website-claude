@@ -2,7 +2,7 @@
 title: Volunteering at IEEE ICC 2026 in Glasgow
 description: A brief description on how this website was created and built.
 date: 2026-05-29
-icon: appwindow
+icon: activity
 ---
 
 ## Why I Bought a Domain

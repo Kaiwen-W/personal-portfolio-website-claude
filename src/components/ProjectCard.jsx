@@ -5,7 +5,7 @@ import ProjectWindow from "./ProjectWindow.jsx";
 export default function ProjectCard({ project }) {
   const href = "#/project/" + encodeURIComponent(project.slug);
   return (
-    <>
+    <div className="flex flex-col h-full">
       <h3 className="arc-display text-lg font-bold">
         <a href={href} className="arc-project-head">
           {project.title}
@@ -15,7 +15,8 @@ export default function ProjectCard({ project }) {
       <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
         {project.description}
       </p>
+      <div className="mt-auto" />
       <ProjectWindow project={project} href={href} className="mt-4" compact />
-    </>
+    </div>
   );
 }

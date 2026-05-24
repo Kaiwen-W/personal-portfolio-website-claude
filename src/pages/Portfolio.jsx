@@ -140,7 +140,7 @@ export default function Portfolio() {
             </Reveal>
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2">
               {projects.map((p, i) => (
-                <Reveal key={p.slug} delay={i * 70}>
+                <Reveal key={p.slug} delay={i * 70} className="h-full">
                   <ProjectCard project={p} />
                 </Reveal>
               ))}
