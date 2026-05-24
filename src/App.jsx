@@ -872,11 +872,27 @@ function Portfolio() {
     let ticking = false;
     const compute = () => {
       ticking = false;
-      const line = window.innerHeight * 0.35;
+      const vh = window.innerHeight;
+      const line = vh * 0.35;
       let current = navItems[0].id;
       for (const n of navItems) {
         const el = document.getElementById(n.id);
         if (el && el.getBoundingClientRect().top <= line) current = n.id;
+      }
+      /* a short trailing section can never scroll its top up to the
+         reference line on a landscape viewport — so once the last
+         section is fully on screen (or the page is scrolled to the
+         bottom), it wins. */
+      const doc = document.documentElement;
+      const last = navItems[navItems.length - 1];
+      const lastEl = document.getElementById(last.id);
+      const atBottom = vh + window.scrollY >= doc.scrollHeight - 2;
+      const scrollable = doc.scrollHeight > vh + 4;
+      if (
+        scrollable &&
+        (atBottom || (lastEl && lastEl.getBoundingClientRect().bottom <= vh))
+      ) {
+        current = last.id;
       }
       setActive(current);
     };
