@@ -493,7 +493,7 @@ const STYLES = `
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-html{scroll-behavior:smooth;}
+html{scroll-behavior:smooth;overflow-x:clip;}
 body{
   background:var(--bg); color:var(--text);
   font-family:'Hanken Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -623,6 +623,7 @@ body{
   background-size:220% 220%;animation:arcGrad 11s ease infinite;
   box-shadow:inset 0 0 90px rgba(0,0,0,0.45);
 }
+.arc-window-body-sm{height:172px;}
 .arc-dots{
   position:absolute;inset:0;opacity:.7;
   background-image:radial-gradient(rgba(255,255,255,0.16) 1px,transparent 1px);
@@ -690,6 +691,28 @@ body{
 .arc-md-hr{border:none;border-top:1px solid var(--border);margin:28px 0;}
 
 .arc-footer-line{border-top:1px solid var(--border);}
+
+/* sticky side-rail navigation */
+.arc-sec{scroll-margin-top:32px;}
+.arc-nav{display:flex;flex-direction:column;gap:1px;}
+.arc-nav-item{
+  position:relative;display:flex;align-items:center;gap:10px;
+  padding:8px 0 8px 14px;border-radius:8px;
+  text-decoration:none;color:var(--muted);
+  font-size:13px;font-weight:600;
+  transition:color .2s ease,background .2s ease;
+}
+.arc-nav-item::before{
+  content:"";position:absolute;left:0;top:50%;
+  width:2px;height:0;transform:translateY(-50%);
+  border-radius:2px;background:var(--coral);
+  transition:height .26s cubic-bezier(.2,.7,.2,1);
+}
+.arc-nav-item:hover{color:var(--text);}
+.arc-nav-num{font-size:11px;color:var(--faint);transition:color .2s ease;}
+.arc-nav-item[data-active="true"]{color:#fff;}
+.arc-nav-item[data-active="true"]::before{height:15px;}
+.arc-nav-item[data-active="true"] .arc-nav-num{color:var(--coral);}
 
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important;}
@@ -783,9 +806,9 @@ function TimelineItem({ item, accent, delay }) {
   );
 }
 
-function TimelineSection({ num, label, accent, items }) {
+function TimelineSection({ id, num, label, accent, items, first }) {
   return (
-    <section className="mt-16">
+    <section id={id} className={first ? "arc-sec" : "arc-sec mt-16"}>
       <Reveal><Eyebrow num={num} label={label} accent={accent} /></Reveal>
       <div>
         {items.map((it, i) => (
@@ -797,7 +820,7 @@ function TimelineSection({ num, label, accent, items }) {
 }
 
 /* the macOS-style project window — used on the home page and post pages */
-function ProjectWindow({ project, href, className = "" }) {
+function ProjectWindow({ project, href, className = "", compact = false }) {
   const inner = (
     <>
       <div className="arc-window-bar">
@@ -806,12 +829,14 @@ function ProjectWindow({ project, href, className = "" }) {
         <span className="arc-windot" style={{ background: "#3142F0" }} />
       </div>
       <div
-        className="arc-window-body"
+        className={"arc-window-body" + (compact ? " arc-window-body-sm" : "")}
         style={{ backgroundImage: `linear-gradient(135deg, ${project.colors[0]}, ${project.colors[1]})` }}
       >
         <div className="arc-dots" />
-        <div className="relative text-center">
-          <div className="arc-display text-2xl font-bold text-white">{project.title}</div>
+        <div className="relative px-4 text-center">
+          <div className={"arc-display font-bold text-white " + (compact ? "text-xl" : "text-2xl")}>
+            {project.title}
+          </div>
           {project.tag && (
             <div className="arc-mono mt-1 text-xs" style={{ color: "rgba(255,255,255,0.72)" }}>
               {project.tag}
@@ -828,126 +853,188 @@ function ProjectWindow({ project, href, className = "" }) {
 }
 
 /* ---------- the home page ---------- */
+/* section list for the rail navigation */
+const navItems = [
+  { id: "experience", num: "01", label: "Experience" },
+  { id: "education", num: "02", label: "Education" },
+  { id: "leadership", num: "03", label: "Leadership" },
+  { id: "projects", num: "04", label: "Projects" },
+  { id: "posts", num: "05", label: "Posts" },
+];
+
 function Portfolio() {
+  const [active, setActive] = useState("experience");
+
+  /* scrollspy — highlight whichever section is crossing the viewport middle */
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+    );
+    navItems.forEach((n) => {
+      const el = document.getElementById(n.id);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <main className="relative z-10 mx-auto max-w-xl px-6 py-16 sm:px-8 sm:py-24">
-      {/* Header */}
-      <Reveal>
-        <h1 className="arc-display text-4xl font-extrabold sm:text-5xl">
-          {profile.name}
-        </h1>
-      </Reveal>
-      <Reveal delay={70}>
-        <p className="mt-2 text-base font-medium" style={{ color: "var(--muted)" }}>
-          {profile.subtitle}
-        </p>
-      </Reveal>
-      <Reveal delay={130}>
-        <p className="mt-4 text-sm leading-relaxed sm:text-base" style={{ color: "var(--muted)" }}>
-          {profile.bio}
-        </p>
-      </Reveal>
-      <Reveal delay={190}>
-        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
-          {profile.socials.map((s) => (
-            <a
-              key={s.label}
-              href={s.href}
-              className="arc-link"
-              target={s.external ? "_blank" : undefined}
-              rel={s.external ? "noreferrer" : undefined}
-            >
-              {s.label}
-              {s.external && <ArrowUpRight size={14} strokeWidth={2.5} />}
-            </a>
-          ))}
-        </div>
-      </Reveal>
+    <div className="relative z-10 mx-auto w-full max-w-5xl px-6 sm:px-8">
+      <div className="lg:flex lg:gap-14">
 
-      {/* Experience / Education / Leadership */}
-      {timelineSections.map((s) => (
-        <TimelineSection key={s.label} num={s.num} label={s.label} accent={s.accent} items={s.items} />
-      ))}
-
-      {/* Projects — generated from src/projects/*.md */}
-      <section className="mt-16">
-        <Reveal><Eyebrow num="04" label="Projects" accent="#FFA0B4" /></Reveal>
-        {projects.map((p, i) => {
-          const href = "#/project/" + encodeURIComponent(p.slug);
-          return (
-            <Reveal key={p.slug} delay={80} className={i === 0 ? "" : "mt-12"}>
-              <h3 className="arc-display text-lg font-bold sm:text-xl">
-                <a href={href} className="arc-project-head">
-                  {p.title}
-                  <ArrowUpRight className="arc-project-arrow" size={18} strokeWidth={2.5} />
-                </a>
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
-                {p.description}
-              </p>
-              <ProjectWindow project={p} href={href} className="mt-4" />
-            </Reveal>
-          );
-        })}
-        <Reveal delay={80} className="mt-12 text-center">
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            …and many more projects in the works.
-          </p>
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            In the meantime, browse the full archive of
-          </p>
-          <div className="mt-3 flex justify-center">
-            <a href="#" className="arc-link text-base font-bold">
-              Everything I&rsquo;ve ever Built <ArrowUpRight size={16} strokeWidth={2.5} />
-            </a>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* Posts — generated from src/posts/*.md */}
-      <section className="mt-16">
-        <Reveal><Eyebrow num="05" label="Posts" accent="#FF3F5C" /></Reveal>
-        <div className="flex flex-col gap-3">
-          {posts.map((post, i) => {
-            const Icon = iconFor(post.icon);
-            const tint = ICON_TINTS[i % ICON_TINTS.length];
-            return (
-              <Reveal key={post.slug} delay={i * 55}>
+        {/* ============ sticky left rail ============ */}
+        <aside className="mx-auto max-w-xl pt-14 lg:mx-0 lg:max-w-none lg:w-72 lg:shrink-0 lg:self-start lg:sticky lg:top-0 lg:py-16">
+          <Reveal>
+            <h1 className="arc-display text-3xl font-extrabold sm:text-4xl">
+              {profile.name}
+            </h1>
+          </Reveal>
+          <Reveal delay={70}>
+            <p className="mt-2 text-sm font-medium" style={{ color: "var(--muted)" }}>
+              {profile.subtitle}
+            </p>
+          </Reveal>
+          <Reveal delay={130}>
+            <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+              {profile.bio}
+            </p>
+          </Reveal>
+          <Reveal delay={190}>
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+              {profile.socials.map((s) => (
                 <a
-                  href={"#/post/" + encodeURIComponent(post.slug)}
-                  className="arc-card flex items-start gap-4 px-4 py-4 sm:px-5"
+                  key={s.label}
+                  href={s.href}
+                  className="arc-link"
+                  target={s.external ? "_blank" : undefined}
+                  rel={s.external ? "noreferrer" : undefined}
                 >
-                  <div className="arc-iconbox h-10 w-10">
-                    <Icon size={18} strokeWidth={2} style={{ color: tint }} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-sm font-semibold leading-snug sm:text-base">
-                        {post.title}
-                      </h3>
-                      <span className="arc-mono shrink-0 text-xs" style={{ color: "var(--faint)" }}>
-                        {post.read}
-                      </span>
-                    </div>
-                    <p className="mt-1 truncate text-xs sm:text-sm" style={{ color: "var(--muted)" }}>
-                      {post.description}
-                    </p>
-                  </div>
-                  <ArrowUpRight className="arc-post-arrow" size={18} strokeWidth={2.25} />
+                  {s.label}
+                  {s.external && <ArrowUpRight size={13} strokeWidth={2.5} />}
                 </a>
-              </Reveal>
-            );
-          })}
-        </div>
-      </section>
+              ))}
+            </div>
+          </Reveal>
+          <Reveal delay={250}>
+            <nav className="arc-nav mt-9 hidden lg:flex">
+              {navItems.map((n) => (
+                <a
+                  key={n.id}
+                  href={"#" + n.id}
+                  className="arc-nav-item"
+                  data-active={active === n.id}
+                >
+                  <span className="arc-nav-num arc-mono">{n.num}</span>
+                  {n.label}
+                </a>
+              ))}
+            </nav>
+          </Reveal>
+        </aside>
 
-      {/* Footer */}
-      <Reveal className="arc-footer-line mt-16 pt-8">
-        <p className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
-          © {new Date().getFullYear()} {profile.name} — built with React &amp; Tailwind CSS
-        </p>
-      </Reveal>
-    </main>
+        {/* ============ scrolling content ============ */}
+        <div className="mx-auto min-w-0 max-w-xl pb-20 pt-10 lg:mx-0 lg:max-w-none lg:flex-1 lg:py-16">
+
+          {/* Experience / Education / Leadership */}
+          {timelineSections.map((s, idx) => (
+            <TimelineSection
+              key={s.label}
+              id={s.label.toLowerCase()}
+              num={s.num}
+              label={s.label}
+              accent={s.accent}
+              items={s.items}
+              first={idx === 0}
+            />
+          ))}
+
+          {/* Projects — generated from src/projects/*.md */}
+          <section id="projects" className="arc-sec mt-16">
+            <Reveal><Eyebrow num="04" label="Projects" accent="#FFA0B4" /></Reveal>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2">
+              {projects.map((p, i) => {
+                const href = "#/project/" + encodeURIComponent(p.slug);
+                return (
+                  <Reveal key={p.slug} delay={i * 70}>
+                    <h3 className="arc-display text-lg font-bold">
+                      <a href={href} className="arc-project-head">
+                        {p.title}
+                        <ArrowUpRight className="arc-project-arrow" size={17} strokeWidth={2.5} />
+                      </a>
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+                      {p.description}
+                    </p>
+                    <ProjectWindow project={p} href={href} className="mt-4" compact />
+                  </Reveal>
+                );
+              })}
+            </div>
+            <Reveal delay={80} className="mt-12 text-center">
+              <p className="text-sm" style={{ color: "var(--muted)" }}>
+                …and many more projects in the works.
+              </p>
+              <p className="text-sm" style={{ color: "var(--muted)" }}>
+                In the meantime, browse the full archive of
+              </p>
+              <div className="mt-3 flex justify-center">
+                <a href="#" className="arc-link text-base font-bold">
+                  Everything I&rsquo;ve ever Built <ArrowUpRight size={16} strokeWidth={2.5} />
+                </a>
+              </div>
+            </Reveal>
+          </section>
+
+          {/* Posts — generated from src/posts/*.md */}
+          <section id="posts" className="arc-sec mt-16">
+            <Reveal><Eyebrow num="05" label="Posts" accent="#FF3F5C" /></Reveal>
+            <div className="flex flex-col gap-3">
+              {posts.map((post, i) => {
+                const Icon = iconFor(post.icon);
+                const tint = ICON_TINTS[i % ICON_TINTS.length];
+                return (
+                  <Reveal key={post.slug} delay={i * 55}>
+                    <a
+                      href={"#/post/" + encodeURIComponent(post.slug)}
+                      className="arc-card flex items-start gap-4 px-4 py-4 sm:px-5"
+                    >
+                      <div className="arc-iconbox h-10 w-10">
+                        <Icon size={18} strokeWidth={2} style={{ color: tint }} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="text-sm font-semibold leading-snug sm:text-base">
+                            {post.title}
+                          </h3>
+                          <span className="arc-mono shrink-0 text-xs" style={{ color: "var(--faint)" }}>
+                            {post.read}
+                          </span>
+                        </div>
+                        <p className="mt-1 truncate text-xs sm:text-sm" style={{ color: "var(--muted)" }}>
+                          {post.description}
+                        </p>
+                      </div>
+                      <ArrowUpRight className="arc-post-arrow" size={18} strokeWidth={2.25} />
+                    </a>
+                  </Reveal>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Footer */}
+          <Reveal className="arc-footer-line mt-16 pt-8">
+            <p className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
+              © {new Date().getFullYear()} {profile.name} — built with React &amp; Tailwind CSS
+            </p>
+          </Reveal>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1081,12 +1168,24 @@ export default function App() {
     return () => window.removeEventListener("pointermove", move);
   }, []);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [hash]);
-
   const postMatch = hash.match(/^#\/post\/(.+)$/);
   const projectMatch = hash.match(/^#\/project\/(.+)$/);
+  const routeKey = postMatch
+    ? "post:" + postMatch[1]
+    : projectMatch
+    ? "project:" + projectMatch[1]
+    : "home";
+
+  /* jump to the top only when the route itself changes — leaves in-page
+     section anchors (#experience, #posts, …) free to scroll normally */
+  const prevRoute = useRef(routeKey);
+  useEffect(() => {
+    if (prevRoute.current !== routeKey) {
+      window.scrollTo(0, 0);
+      prevRoute.current = routeKey;
+    }
+  }, [routeKey]);
+
   let view;
   if (postMatch) {
     const slug = decodeURIComponent(postMatch[1]);
@@ -1101,7 +1200,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden">
+    <div className="relative min-h-screen w-full">
       <style>{STYLES}</style>
 
       <div className="arc-blob" style={{ width: 380, height: 380, top: -130, left: -150, background: "#FF3F5C", opacity: 0.26, animation: "arcDrift1 19s ease-in-out infinite" }} />
