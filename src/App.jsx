@@ -5,6 +5,7 @@ import Portfolio from "./pages/Portfolio.jsx";
 import PostView from "./pages/PostView.jsx";
 import ProjectView from "./pages/ProjectView.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import ReadingProgress from "./components/ReadingProgress.jsx";
 
 /* tiny hash router — keeps the site working on GitHub Pages with no
    server config. Routes: #/ (home), #/post/<slug>, #/project/<slug>. */
@@ -71,6 +72,7 @@ export default function App() {
   return (
     <div className="relative min-h-screen w-full">
       <Background />
+      {(postMatch || projectMatch) && <ReadingProgress key={routeKey} />}
       {view}
     </div>
   );

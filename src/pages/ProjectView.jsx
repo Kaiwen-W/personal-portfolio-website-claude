@@ -1,7 +1,17 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Shuffle } from "lucide-react";
 import { formatDate, renderMarkdown } from "../lib/markdown.jsx";
+import { projects } from "../content.js";
 import Reveal from "../components/Reveal.jsx";
+import PrevNext from "../components/PrevNext.jsx";
 import ProjectWindow from "../components/ProjectWindow.jsx";
+
+/* jump to a random project other than the current one */
+function goToRandomProject(currentSlug) {
+  const others = projects.filter((p) => p.slug !== currentSlug);
+  if (others.length === 0) return;
+  const next = others[Math.floor(Math.random() * others.length)];
+  window.location.hash = "#/project/" + encodeURIComponent(next.slug);
+}
 
 export default function ProjectView({ project }) {
   return (
@@ -35,10 +45,22 @@ export default function ProjectView({ project }) {
       <Reveal delay={270}>
         <div className="mt-9">{renderMarkdown(project.body)}</div>
       </Reveal>
-      <Reveal className="arc-footer-line mt-14 pt-8">
+      <Reveal>
+        <PrevNext items={projects} currentSlug={project.slug} kind="project" />
+      </Reveal>
+      <Reveal className="arc-footer-line mt-14 flex items-center justify-between gap-4 pt-8">
         <a href="#/" className="arc-back">
           <ArrowLeft size={15} strokeWidth={2.5} /> Back to home
         </a>
+        {projects.length > 1 && (
+          <button
+            type="button"
+            className="arc-shuffle"
+            onClick={() => goToRandomProject(project.slug)}
+          >
+            <Shuffle size={15} strokeWidth={2.5} /> Random project
+          </button>
+        )}
       </Reveal>
     </main>
   );
