@@ -7,6 +7,8 @@ icon: sparkles
 
 Gesture Fan began with a simple annoyance: a fan that blows air at an empty corner of the room while you sit just out of its reach.
 
+![The Gesture Fan prototype](posts/placeholder.svg)
+
 ## The idea
 
 What if the fan could see? Not in a creepy way — just enough to know roughly where a person is and point itself at them. And if it could see hands, it could skip the remote entirely.

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#101018"/>
+  <rect x="44" y="44" width="1512" height="812" rx="30" fill="none"
+        stroke="#FF3F5C" stroke-opacity="0.45" stroke-width="3" stroke-dasharray="16 14"/>
+  <g transform="translate(800 372)" stroke="#FF3F5C" stroke-width="7"
+     fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-78" y="-60" width="156" height="120" rx="14"/>
+    <circle cx="-34" cy="-18" r="18"/>
+    <path d="M-78 44 L-22 -8 L24 34 L52 12 L78 44"/>
+  </g>
+  <text x="800" y="556" text-anchor="middle" fill="#ECECEF"
+        font-family="system-ui, sans-serif" font-size="48" font-weight="700">
+    Project image placeholder
+  </text>
+  <text x="800" y="616" text-anchor="middle" fill="#7E7E88"
+        font-family="ui-monospace, monospace" font-size="30">
+    replace public/projects/pulse.svg with your screenshot
+  </text>
+</svg>

@@ -56,19 +56,45 @@ Create `src/projects/my-project.md`:
     description: One-line blurb shown on the home page
     date: 2026-06-01
     colors: #FF3F5C, #5B3BF0
+    image: projects/my-project.png
     ---
 
     # Writeup
 
     Body text in **Markdown**...
 
-`colors` is the two-colour gradient used in the project's window preview.
 The project appears in the Projects section automatically, with its own page
 at `#/project/<filename>`.
 
+### Images inside post / project text
+
+To put an image in the body of a post or project, use normal Markdown
+image syntax on its own line:
+
+    ![A short description](posts/my-diagram.png)
+
+Put the image file anywhere under `public/` (e.g. `public/posts/my-diagram.png`)
+and write the path relative to `public/`. A full `https://...` URL works too.
+The text in the brackets becomes the image's alt text.
+
+(The `Building Gesture Fan` post includes a placeholder image at
+`public/posts/placeholder.svg` as a live example — swap or remove it.)
+
+### Project images
+
+To show a screenshot in a project's window instead of the colour gradient:
+
+1. Put the image file in `public/projects/` — e.g. `public/projects/my-project.png`.
+2. Add `image: projects/my-project.png` to that project's frontmatter.
+
+The path is relative to the `public/` folder. A full URL (`https://...`) also
+works. If `image:` is omitted, the window falls back to the `colors` gradient,
+so `colors` is still worth setting. (`Pulse` ships with a placeholder image at
+`public/projects/pulse.svg` — swap it for a real screenshot.)
+
 ## Edit the rest of the site
 
-Open `src/App.jsx`. The block at the top holds everything else:
+Open `src/data.js` — it holds the bio and CV-style entries:
 
 - `profile` — your name, subtitle, bio and social links
 - `experience` — work roles (with an expandable `details` dropdown)
@@ -76,6 +102,21 @@ Open `src/App.jsx`. The block at the top holds everything else:
 - `leadership` — societies, committees, mentoring roles
 
 (Projects and posts are Markdown files, covered above.)
+
+## Project structure
+
+```
+src/
+  data.js            bio + experience/education/leadership
+  content.js         loads the Markdown posts & projects
+  posts/             one .md file per post
+  projects/          one .md file per project
+  index.css          theme + all custom styles
+  App.jsx            hash router
+  lib/               markdown renderer, icon map
+  components/        Reveal, Eyebrow, Timeline, ProjectWindow, Background
+  pages/             Portfolio, PostView, ProjectView, NotFound
+```
 
 ## Deploy to GitHub Pages
 
