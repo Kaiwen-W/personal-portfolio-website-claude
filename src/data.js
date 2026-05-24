@@ -13,59 +13,48 @@
  * ================================================================== */
 
 export const profile = {
-  name: "Alex Rivera",
-  subtitle: "Software engineer based in Edinburgh, UK",
-  bio: "I build small tools that make everyday things feel a little more delightful — usually somewhere between hardware, interfaces and the people who use them. Most of it ends up on [GitHub](https://github.com/yourhandle).",
+  name: "Kaiwen Wang",
+  subtitle: "Incoming 2nd Year CS & Maths Student at University of Edinburgh",
+  bio: "Currently the President of [CompSoc](https://comp-soc.com), NLP researcher at [Edinburgh University](https://elm.edina.ac.uk/), and ambassador at [JetBrains](https://www.jetbrains.com/). Interested in NLP and AI/ML as a whole as well as competitive programming.",
   socials: [
     { label: "Now", href: "#/now", external: false },
-    { label: "Twitter", href: "https://twitter.com/yourhandle", external: true },
-    { label: "GitHub", href: "https://github.com/yourhandle", external: true },
-    { label: "LinkedIn", href: "https://linkedin.com/in/yourhandle", external: true },
-    { label: "Email", href: "mailto:you@example.com", external: false },
+    { label: "GitHub", href: "https://github.com/Kaiwen-W", external: true },
+    {
+      label: "LinkedIn",
+      href: "https://linkedin.com/in/wangkaiwen",
+      external: true,
+    },
+    {
+      label: "Email",
+      href: "mailto:kaiwen.wang.uk@gmail.com",
+      external: false,
+    },
   ],
 };
 
 export const experience = [
   {
-    org: "Lumen Labs",
-    role: "Software Engineer",
-    period: "Sept 2025",
+    org: "University of Edinburgh",
+    role: "ELM Research Intern",
+    period: "Incoming Jun 2026",
     details: {
       location: "Edinburgh, UK · Full-time",
       summary:
-        "On the platform team, building internal tooling and developer-facing APIs used across the company.",
-      highlights: [
-        "Shipped a build service that cut average deploy times by ~40%.",
-        "Owned the migration to a shared design-system component library.",
-        "Mentor incoming interns and run weekly frontend office hours.",
-      ],
+        "[ELM](https://elm.edina.ac.uk/) is Edinburgh University's own generative AI platform, I will intern there soon.",
+      highlights: [],
     },
   },
   {
-    org: "Cobalt",
-    role: "Software Engineering Intern",
-    period: "Summer 2024",
+    org: "CENSIS",
+    role: "Intern",
+    period: "April 2022",
     details: {
-      location: "London, UK · Internship",
+      location: "Glasgow, UK · Full-time",
       summary:
-        "Joined the payments squad for a 12-week internship focused on reliability and observability.",
+        "CENSIS is Scotland's innovation centre for sensing, imaging, and IoT. I worked on computer vision and PCB design. Completed in S5 of Secondary School.",
       highlights: [
-        "Built an automated reconciliation dashboard adopted by the ops team.",
-        "Added end-to-end tests covering the three highest-traffic flows.",
-      ],
-    },
-  },
-  {
-    org: "Helio",
-    role: "Software Engineering Intern",
-    period: "Summer 2022",
-    details: {
-      location: "Remote · Internship",
-      summary:
-        "First industry internship, working across the mobile app codebase.",
-      highlights: [
-        "Implemented offline caching for the activity feed.",
-        "Closed 30+ issues from the public bug tracker.",
+        "Designed ultra-low-power MCU-based temperature and humidity sensor PCB with Altium Designer, including ERC-checked schematics, hand-routed GND traces and a bottom layer GND plane, delivering production prototypes costing only £0.38.",
+        "Built zero-shot SAM pipeline for medical image segmentation with multi-mask outputs, eliminating custom annotation needs.",
       ],
     },
   },
@@ -74,30 +63,29 @@ export const experience = [
 export const education = [
   {
     org: "University of Edinburgh",
-    role: "BSc (Hons) Computer Science — First Class",
-    period: "2021–2025",
+    role: "BSc (Hons) Computer Science & Mathematics — 86% Average",
+    period: "Expected 2029",
     details: {
       location: "Edinburgh, UK",
-      summary:
-        "Four-year honours degree focused on systems, machine learning and human-computer interaction.",
+      summary: "Four-year honours degree at the best place in the world.",
       highlights: [
-        "Dissertation on peer-feedback tooling, later adapted into a paper.",
-        "Class representative for two consecutive years.",
-        "Coursework: Distributed Systems, Computer Vision, HCI.",
+        "Courses: Introduction to Audio Machine Learning, OOP, Functional Programming & Logic, Linear Algebra, and Real Analysis.",
+        "Societies (outside of CompSoc and our SIGs): University's Badminton Team (4th out of 6) and [EUTIC](https://www.eutic.org.uk/) Quant.",
       ],
     },
   },
   {
-    org: "KTH Royal Institute of Technology",
-    role: "Exchange semester · Computer Science",
-    period: "Spring 2024",
+    org: "Jordanhill School",
+    role: "High School - 4A1s at Advanced Higher, 6A1s at Higher",
+    period: "2019 - 2025",
     details: {
-      location: "Stockholm, Sweden",
-      summary:
-        "One-semester exchange taking advanced courses not offered at home.",
+      location: "Glasgow, UK",
+      summary: "Where I first fell in love with coding.",
       highlights: [
-        "Studied Embedded Systems and Interaction Design.",
-        "Built a capstone project with a four-person international team.",
+        "House Captain in S5, co-organising weekly club, led a team of students in organising and delivering house events, and trained as a Mentor in Violence Protection, delivering lessons to classes.",
+        "Winner of National WoSPEG Physics Competition, 5 x Gold in UKMT and Scottish Maths Challenges",
+        "First in Year for Advanced Higher Computing Science, National 5 Mathematics and Chemistry, 6 x Merit Prizes for Academic Excellence",
+        "Runner-Up in Young Musician of the Year competition for classical guitar, guitarist and bassist in various bands",
       ],
     },
   },
@@ -105,13 +93,13 @@ export const education = [
 
 export const leadership = [
   {
-    org: "Build Circle",
-    role: "Founder & President",
-    period: "2023–2025",
+    org: "CompSoc - Edinburgh University Tech Society",
+    role: "President",
+    period: "Apr 2026 - Present",
     details: {
       location: "University of Edinburgh",
       summary:
-        "Founded and ran a society for students working on side projects.",
+        "President for the 2026 - 2027 Academic Year for Scotland's largest tech society with 25+ years of history.",
       highlights: [
         "Grew the community to 120+ active members.",
         "Organised fortnightly demo nights and an end-of-year showcase.",
@@ -120,29 +108,28 @@ export const leadership = [
     },
   },
   {
-    org: "Hack the Burgh",
-    role: "Organising Committee",
-    period: "2023–2024",
+    org: "Jetbrains",
+    role: "Campus Ambassador",
+    period: "May 2026 - Present",
     details: {
-      location: "University of Edinburgh",
-      summary: "Helped run one of Scotland's largest student hackathons.",
+      location: "Glasgow",
+      summary: "Organising cool meetups pre-University.",
       highlights: [
-        "Led logistics for 300+ attendees across the weekend.",
-        "Coordinated mentors and judging over 12 sponsor tracks.",
+        "Organised technical meetups, curating speakers from top tech companies, serving a community of 200+ developers",
+        "Delivered technical presentations on reinforcement learning at multiple events, engaging audiences of 80+ attendees",
       ],
     },
   },
   {
-    org: "Edinburgh CompSoc",
-    role: "Student Mentor",
-    period: "2022–2023",
+    org: "Google Develop Groups Glasgow",
+    role: "Organiser",
+    period: "Nov 2024 - Present",
     details: {
-      location: "University of Edinburgh",
-      summary:
-        "Mentored first-year students through the transition into the CS programme.",
+      location: "Glasgow",
+      summary: "Organising cool meetups pre-University.",
       highlights: [
-        "Ran weekly drop-in sessions on coursework and tooling.",
-        "Paired with 8 mentees across the academic year.",
+        "Organised technical meetups, curating speakers from top tech companies, serving a community of 200+ developers",
+        "Delivered technical presentations on reinforcement learning at multiple events, engaging audiences of 80+ attendees",
       ],
     },
   },

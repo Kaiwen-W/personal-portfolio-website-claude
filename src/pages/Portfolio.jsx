@@ -14,27 +14,31 @@ export default function Portfolio() {
 
   /* scrollspy — highlight the rail nav item for the section in view.
      Picks the last section whose top has passed a reference line near
-     the top of the viewport; a bottom guard handles short trailing
-     sections that can never reach that line on a landscape screen. */
+     the top of the viewport. A bottom guard handles a short trailing
+     section that may never cross that line — but it must only fire
+     once genuinely scrolled to the end, never at the top. */
   useEffect(() => {
     let ticking = false;
     const compute = () => {
       ticking = false;
       const vh = window.innerHeight;
+      const doc = document.documentElement;
       const line = vh * 0.35;
+
       let current = navItems[0].id;
       for (const n of navItems) {
         const el = document.getElementById(n.id);
         if (el && el.getBoundingClientRect().top <= line) current = n.id;
       }
-      const doc = document.documentElement;
-      const last = navItems[navItems.length - 1];
-      const lastEl = document.getElementById(last.id);
-      const atBottom = vh + window.scrollY >= doc.scrollHeight - 2;
-      const scrollable = doc.scrollHeight > vh + 4;
-      if (scrollable && (atBottom || (lastEl && lastEl.getBoundingClientRect().bottom <= vh))) {
-        current = last.id;
+
+      /* only once the page is genuinely scrolled to its end — checking
+         scroll position, not whether the last section is merely visible,
+         so this can never override the first section at the top */
+      const maxScroll = doc.scrollHeight - vh;
+      if (maxScroll > 4 && window.scrollY >= maxScroll - 4) {
+        current = navItems[navItems.length - 1].id;
       }
+
       setActive(current);
     };
     const onScroll = () => {
@@ -55,7 +59,6 @@ export default function Portfolio() {
   return (
     <div className="relative z-10 mx-auto w-full max-w-5xl px-6 sm:px-8">
       <div className="lg:flex lg:gap-14">
-
         {/* ============ sticky left rail ============ */}
         <aside className="mx-auto max-w-xl pt-14 lg:mx-0 lg:max-w-none lg:w-72 lg:shrink-0 lg:self-start lg:sticky lg:top-0 lg:py-16">
           <Reveal>
@@ -64,12 +67,18 @@ export default function Portfolio() {
             </h1>
           </Reveal>
           <Reveal delay={70}>
-            <p className="mt-2 text-sm font-medium" style={{ color: "var(--muted)" }}>
+            <p
+              className="mt-2 text-sm font-medium"
+              style={{ color: "var(--muted)" }}
+            >
               <Rich text={profile.subtitle} />
             </p>
           </Reveal>
           <Reveal delay={130}>
-            <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+            <p
+              className="mt-4 text-sm leading-relaxed"
+              style={{ color: "var(--muted)" }}
+            >
               <Rich text={profile.bio} />
             </p>
           </Reveal>
@@ -108,7 +117,6 @@ export default function Portfolio() {
 
         {/* ============ scrolling content ============ */}
         <div className="mx-auto min-w-0 max-w-xl pb-20 pt-10 lg:mx-0 lg:max-w-none lg:flex-1 lg:py-16">
-
           {/* Experience / Education / Leadership */}
           {timelineSections.map((s, idx) => (
             <TimelineSection
@@ -143,7 +151,8 @@ export default function Portfolio() {
               </p>
               <div className="mt-3 flex justify-center">
                 <a href="#/projects" className="arc-link text-base font-bold">
-                  Everything I&rsquo;ve ever Built <ArrowUpRight size={16} strokeWidth={2.5} />
+                  Everything I&rsquo;ve ever Built{" "}
+                  <ArrowUpRight size={16} strokeWidth={2.5} />
                 </a>
               </div>
             </Reveal>
@@ -157,7 +166,10 @@ export default function Portfolio() {
             <div className="flex flex-col gap-3">
               {posts.map((post, i) => (
                 <Reveal key={post.slug} delay={i * 55}>
-                  <PostCard post={post} tint={ICON_TINTS[i % ICON_TINTS.length]} />
+                  <PostCard
+                    post={post}
+                    tint={ICON_TINTS[i % ICON_TINTS.length]}
+                  />
                 </Reveal>
               ))}
             </div>
@@ -171,7 +183,7 @@ export default function Portfolio() {
           {/* Footer */}
           <Reveal className="arc-footer-line mt-16 pt-8">
             <p className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
-              © {new Date().getFullYear()} {profile.name} — built with React &amp; Tailwind CSS
+              Kaiwen {"<"}3 You!
             </p>
           </Reveal>
         </div>

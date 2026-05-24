@@ -1,5 +1,5 @@
 ---
-title: What I use
+title: Reflections of My First Year at University
 description: A list of tools and gear I use and recommend
 date: 2026-05-10
 icon: wrench
