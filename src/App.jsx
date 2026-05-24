@@ -865,21 +865,34 @@ const navItems = [
 function Portfolio() {
   const [active, setActive] = useState("experience");
 
-  /* scrollspy — highlight whichever section is crossing the viewport middle */
+  /* scrollspy — pick the last section whose top has passed a reference
+     line near the top of the viewport. Deterministic at the very top
+     and bottom of the page, unlike a middle-band observer. */
   useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive(e.target.id);
-        });
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
-    );
-    navItems.forEach((n) => {
-      const el = document.getElementById(n.id);
-      if (el) obs.observe(el);
-    });
-    return () => obs.disconnect();
+    let ticking = false;
+    const compute = () => {
+      ticking = false;
+      const line = window.innerHeight * 0.35;
+      let current = navItems[0].id;
+      for (const n of navItems) {
+        const el = document.getElementById(n.id);
+        if (el && el.getBoundingClientRect().top <= line) current = n.id;
+      }
+      setActive(current);
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        window.requestAnimationFrame(compute);
+      }
+    };
+    compute();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   return (
@@ -1155,9 +1168,10 @@ function useHashRoute() {
 }
 
 export default function App() {
-  const glowRef = useRef(null);
   const hash = useHashRoute();
 
+  /* --- cursor-following glow (disabled) ---
+  const glowRef = useRef(null);
   useEffect(() => {
     const move = (e) => {
       if (glowRef.current) {
@@ -1167,6 +1181,7 @@ export default function App() {
     window.addEventListener("pointermove", move);
     return () => window.removeEventListener("pointermove", move);
   }, []);
+  --- end cursor-following glow --- */
 
   const postMatch = hash.match(/^#\/post\/(.+)$/);
   const projectMatch = hash.match(/^#\/project\/(.+)$/);
@@ -1207,7 +1222,7 @@ export default function App() {
       <div className="arc-blob" style={{ width: 440, height: 440, top: "34%", right: -200, background: "#3142F0", opacity: 0.24, animation: "arcDrift2 23s ease-in-out infinite" }} />
       <div className="arc-blob" style={{ width: 360, height: 360, bottom: -150, left: "22%", background: "#5B3BF0", opacity: 0.28, animation: "arcDrift3 21s ease-in-out infinite" }} />
       <div className="arc-noise" />
-      <div ref={glowRef} className="arc-glow" />
+      {/* <div ref={glowRef} className="arc-glow" /> */}
 
       {view}
     </div>
