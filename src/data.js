@@ -107,20 +107,18 @@ export const leadership = [
     },
   },
   {
-    org: "Jetbrains",
+    org: "JetBrains",
     role: "Campus Ambassador",
     period: "May 2026 - Present",
     details: {
       location: "University of Edinburgh",
-      summary: "Organising cool meetups pre-University.",
-      highlights: [
-        "Organised technical meetups, curating speakers from top tech companies, serving a community of 200+ developers",
-        "Delivered technical presentations on reinforcement learning at multiple events, engaging audiences of 80+ attendees",
-      ],
+      summary:
+        "Organising events for JetBrains while promoting their products and internships.",
+      highlights: [],
     },
   },
   {
-    org: "Google Develop Groups Glasgow",
+    org: "Google Developer Groups Glasgow",
     role: "Organiser",
     period: "Nov 2024 - Present",
     details: {
