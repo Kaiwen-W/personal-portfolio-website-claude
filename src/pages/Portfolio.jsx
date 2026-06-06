@@ -185,9 +185,14 @@ export default function Portfolio() {
 
           {/* Footer */}
           <Reveal className="arc-footer-line mt-16 pt-8">
-            <p className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
-              Kaiwen {"<"}3 You!
-            </p>
+            <div className="flex justify-between w-full">
+              <p className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
+                Kaiwen {"<"}3 You!
+              </p>
+              <p className="arc-mono text-xs" style={{ color: "var(--faint)" }}>
+                Last updated 2026-06-06
+              </p>
+            </div>
           </Reveal>
         </div>
       </div>

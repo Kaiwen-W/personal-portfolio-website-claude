@@ -36,12 +36,14 @@ export const experience = [
   {
     org: "University of Edinburgh",
     role: "ELM Research Intern",
-    period: "Incoming Jun 2026",
+    period: "Jun 2026 - Present",
     details: {
       location: "Edinburgh, UK · Full-time",
       summary:
         "[ELM](https://elm.edina.ac.uk/) is Edinburgh University's own generative AI platform, I will intern there soon.",
-      highlights: [],
+      highlights: [
+        "Currently working on open-source LLM biases and LLM moderation models.",
+      ],
     },
   },
   {
@@ -63,7 +65,7 @@ export const experience = [
 export const education = [
   {
     org: "University of Edinburgh",
-    role: "BSc (Hons) Computer Science & Mathematics — 86% Average",
+    role: "BSc (Hons) Computer Science & Mathematics — 90% Average",
     period: "Expected 2029",
     details: {
       location: "Edinburgh, UK",
@@ -76,7 +78,7 @@ export const education = [
   },
   {
     org: "Jordanhill School",
-    role: "High School - 4A1s at Advanced Higher, 6A1s at Higher",
+    role: "High School — 4A1s at Advanced Higher, 6A1s at Higher",
     period: "2019 - 2025",
     details: {
       location: "Glasgow, UK",
@@ -101,8 +103,8 @@ export const leadership = [
       summary:
         "President for the 2026 - 2027 Academic Year for Scotland's largest tech society with 25+ years of history.",
       highlights: [
-        "Currently trying to get sponsors.",
-        "Previously first year representative where I acted as a liason for 400 first years, and co-organised events such as HackTheBurgh, InfBall and STMUs. ",
+        "Currently trying to get sponsors...",
+        "Previously first year representative where I acted as a liaison for 400 first years, and co-organised events such as HackTheBurgh, InfBall and STMUs. ",
       ],
     },
   },

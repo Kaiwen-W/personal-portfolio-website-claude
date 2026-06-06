@@ -1,5 +1,9 @@
 ---
-updated: 2026-05-25
+updated: 2026-06-06
 ---
 
-Finishing this god damn website bruh.
+Currently learning docker, and I need to do leetcode lmao.
+
+I want to learn langchain, so will probably do that after learning docker.
+
+And ofc finishing this website.
