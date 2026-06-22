@@ -2,26 +2,18 @@ import { useState, useEffect } from "react";
 import { flushSync } from "react-dom";
 import { Sun, Moon } from "lucide-react";
 
-function readStored() {
-  try {
-    return localStorage.getItem("theme");
-  } catch (e) {
-    return null;
-  }
-}
-
 function currentTheme() {
   if (typeof document !== "undefined") {
     const t = document.documentElement.getAttribute("data-theme");
     if (t === "light" || t === "dark") return t;
   }
-  return "dark";
+  return "light";
 }
 
 /* Light / dark toggle. The initial theme is resolved before paint by a
-   small script in index.html (stored choice → OS preference → dark).
-   This button flips it (and cross-fades via the View Transitions API),
-   and keeps following the OS while no explicit choice has been made. */
+   small script in index.html (stored choice → light). Light is the default
+   for any visitor who hasn't picked a theme; this button flips it (and
+   cross-fades via the View Transitions API). */
 export default function ThemeToggle() {
   const [theme, setTheme] = useState(currentTheme);
 
@@ -32,16 +24,6 @@ export default function ThemeToggle() {
       meta.setAttribute("content", theme === "light" ? "#FAFAFB" : "#08080B");
     }
   }, [theme]);
-
-  /* follow the OS while the visitor hasn't picked a theme themselves */
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: light)");
-    const onChange = (e) => {
-      if (!readStored()) setTheme(e.matches ? "light" : "dark");
-    };
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
 
   const toggle = () => {
     const next = theme === "dark" ? "light" : "dark";

@@ -7,21 +7,19 @@
     <meta name="description" content="Personal site of Kaiwen Wang." />
     <meta name="theme-color" content="#08080B" />
     <script>
-      /* Resolve the theme before first paint: stored choice → OS → dark. */
+      /* Resolve the theme before first paint: stored choice → light. */
       (function () {
         try {
           var t = localStorage.getItem("theme");
           if (t !== "light" && t !== "dark") {
-            t = window.matchMedia("(prefers-color-scheme: light)").matches
-              ? "light"
-              : "dark";
+            t = "light";
           }
           document.documentElement.setAttribute("data-theme", t);
           var m = document.querySelector('meta[name="theme-color"]');
           if (m)
             m.setAttribute("content", t === "light" ? "#FAFAFB" : "#08080B");
         } catch (e) {
-          document.documentElement.setAttribute("data-theme", "dark");
+          document.documentElement.setAttribute("data-theme", "light");
         }
       })();
     </script>

@@ -1,6 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <!-- brand gradient: blue → indigo → coral → pink -->
+    <linearGradient id="k-grad" x1="14" y1="12" x2="50" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3142F0"/>
+      <stop offset="0.42" stop-color="#5B3BF0"/>
+      <stop offset="0.82" stop-color="#FF3F5C"/>
+      <stop offset="1" stop-color="#FFA0B4"/>
+    </linearGradient>
+  </defs>
   <rect width="64" height="64" rx="15" fill="#09090C"/>
-  <circle cx="24" cy="38" r="11" fill="none" stroke="#3142F0" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="40" cy="38" r="11" fill="none" stroke="#FF3F5C" stroke-width="6" stroke-linecap="round"/>
-  <path d="M19 40 L32 16 L45 40" fill="none" stroke="#FFA0B4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- white outline: same shapes drawn thicker, underneath -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="19" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 16 V48"/>
+    <path d="M43 16 L22 32 L43 48"/>
+  </g>
+  <!-- bubbly gradient K on top -->
+  <g fill="none" stroke="url(#k-grad)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 16 V48"/>
+    <path d="M43 16 L22 32 L43 48"/>
+  </g>
 </svg>
