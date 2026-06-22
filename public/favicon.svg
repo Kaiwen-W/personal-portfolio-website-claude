@@ -8,15 +8,18 @@
       <stop offset="1" stop-color="#FFA0B4"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="15" fill="#09090C"/>
-  <!-- white outline: same shapes drawn thicker, underneath -->
-  <g fill="none" stroke="#FFFFFF" stroke-width="19" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M22 16 V48"/>
-    <path d="M43 16 L22 32 L43 48"/>
-  </g>
-  <!-- bubbly gradient K on top -->
-  <g fill="none" stroke="url(#k-grad)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M22 16 V48"/>
-    <path d="M43 16 L22 32 L43 48"/>
+  <!-- <rect width="64" height="64" rx="15" fill="#09090C"/> -->
+  <!-- scale the K up about the canvas center -->
+  <g transform="translate(32 32) scale(1.17) translate(-32 -32)">
+    <!-- white outline: same shapes drawn thicker, underneath -->
+    <g fill="none" stroke="#FFFFFF" stroke-width="19" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 16 V48"/>
+      <path d="M43 16 L22 32 L43 48"/>
+    </g>
+    <!-- bubbly gradient K on top -->
+    <g fill="none" stroke="url(#k-grad)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 16 V48"/>
+      <path d="M43 16 L22 32 L43 48"/>
+    </g>
   </g>
 </svg>

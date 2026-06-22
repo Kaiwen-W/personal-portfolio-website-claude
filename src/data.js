@@ -40,9 +40,9 @@ export const experience = [
     details: {
       location: "Edinburgh, UK · Full-time",
       summary:
-        "[ELM](https://elm.edina.ac.uk/) is Edinburgh University's own generative AI platform, I will intern there soon.",
+        "[ELM](https://elm.edina.ac.uk/) is Edinburgh University's own generative AI platform.",
       highlights: [
-        "Currently working on open-source LLM biases and LLM moderation models.",
+        "Currently working on open-weight LLM biases, LLM moderation models, LLM self-moderation, and agentic AI research assistants.",
       ],
     },
   },
