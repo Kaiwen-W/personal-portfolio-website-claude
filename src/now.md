@@ -1,9 +1,7 @@
 ---
-updated: 2026-06-06
+updated: 2026-08-30
 ---
 
-Currently learning docker, and I need to do leetcode lmao.
+Currently going through _"Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems"_ to learn system design and doing leetcode.
 
-I want to learn langchain, so will probably do that after learning docker.
-
-And ofc finishing this website.
+Also getting sponsors for CompSoc and organising HackTheBurgh.

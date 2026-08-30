@@ -15,7 +15,7 @@
 export const profile = {
   name: "Kaiwen Wang",
   subtitle: "Incoming 2nd Year CS & Maths Student at University of Edinburgh",
-  bio: "Currently the President of [CompSoc](https://comp-soc.com), NLP researcher at [Edinburgh University](https://elm.edina.ac.uk/), and ambassador at [JetBrains](https://www.jetbrains.com/). Interested in NLP and AI/ML as a whole as well as competitive programming.",
+  bio: "Currently the President of [CompSoc](https://comp-soc.com) and ambassador at [JetBrains](https://www.jetbrains.com/). Previously NLP researcher at [Edinburgh University](https://elm.edina.ac.uk/). Interested in NLP and AI/ML as a whole as well as competitive programming.",
   socials: [
     { label: "Now", href: "#/now", external: false },
     { label: "GitHub", href: "https://github.com/Kaiwen-W", external: true },
@@ -36,13 +36,17 @@ export const experience = [
   {
     org: "University of Edinburgh",
     role: "ELM Research Intern",
-    period: "Jun 2026 - Present",
+    period: "Jun 2026 - Aug 2026",
     details: {
       location: "Edinburgh, UK · Full-time",
       summary:
-        "[ELM](https://elm.edina.ac.uk/) is Edinburgh University's own generative AI platform.",
+        "[ELM](https://elm.edina.ac.uk/) (Edinburgh Language Model) is The University of Edinburgh's own generative AI platform. Today it serves 6000+ users with over 50000 daily prompts. There I researched evaluation methods for LLMs and LLM moderation models. ",
       highlights: [
-        "Currently working on open-weight LLM biases, LLM moderation models, LLM self-moderation, and agentic AI research assistants.",
+        "Replaced incumbent LLM guard, increasing F1 (46% to 77%) while running ∼2.5x faster at half the VRAM. I proved moderation verdicts track policy via a 44-run strict/permissive steerability test.",
+        "Onboarded Qwen onto by developing a Python evaluation framework over 7 social and geopolitical bias benchmarks and against 4 comparison models. Produced a report which shaped how Qwen was deployed by staff.",
+        "Enabled staff to vet any future model with zero code change by engineering a pluggable model-runner over local and cloud backends, and cut full benchmark runtime by 65% with seeded stratified subsampling",
+        "Formalised a cross-lingual consistency score (cosine similarity + BERTScore) to quantify answer inconsistency on multi-lingual prompts",
+        "Evaluated open-source NotebookLM-class platforms and integrated one into ELM, plus a technical report on maths rendering defects in the Angular frontend.",
       ],
     },
   },
@@ -101,9 +105,11 @@ export const leadership = [
     details: {
       location: "University of Edinburgh",
       summary:
-        "President for the 2026 - 2027 Academic Year for Scotland's largest tech society with 25+ years of history.",
+        "CompSoc is Scotland's largest tech society with 2,700+ members, 100+ industry talks, workshops, and socials and 12 Special Interest Groups each focusing on a different part of CS. ",
       highlights: [
-        "Currently trying to get sponsors...",
+        "Led a 27-person committee while securing a £140,000 budget (a 20% increase YOY) supported by 13 sponsors",
+        "Co-organising HackTheBurgh, Scotland’s largest hackathon with an expected 300 attendees and £15,000 of prizes",
+        "Organised 10 introductory events aimed at first-years, gathering feedback and improving engagement by 30%",
         "Previously first year representative where I acted as a liaison for 400 first years, and co-organised events such as HackTheBurgh, InfBall and STMUs. ",
       ],
     },
@@ -115,7 +121,7 @@ export const leadership = [
     details: {
       location: "University of Edinburgh",
       summary:
-        "Organising events for JetBrains while promoting their products and internships.",
+        "Lead of university relations across Scotland, coordinating events across 5 universities, with 60 - 120 attendees at each event.",
       highlights: [],
     },
   },
